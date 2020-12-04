@@ -83,7 +83,7 @@ partial class Script : ScriptBase
 			string how = "Clean,Build";
 			string proj = CWD + $"..\\{APPNAME}\\{APPNAME}Windows.csproj";
 			Debug.Assert(File.Exists(proj));
-			SpawnProcess(@"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe",
+			SpawnProcess(@"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe",
 					$"{proj} /t:{how} /p:Configuration={CONFIG} /p:Platform=x64");
 			
 			var WORK_DIR = $"{CWD}TmpInput\\";

@@ -1,0 +1,54 @@
+namespace Settings
+{
+	const cNAME = "omnilite";
+	const cPATH = System.path(#USER_APPDATA) + "/settings-" + cNAME + ".json";
+	const cVERSION = 0x1;
+	var ns_data;
+	
+	function RestoreWork()// read settings
+	{
+		//view.Host_FileDelete(cPATH);
+		//stdout.println(cPATH);
+
+		var stream = Stream.openFile(cPATH, "r");
+		
+		if(stream)
+		{
+			try
+			{
+				ns_data = parseData(stream);
+			} catch(e) {
+				//log("RestoreWork failed!");
+			}
+			stream.close();
+		} else {
+			//log("RestoreWork failed to open " + cPATH);
+		}
+		
+		View["settings-" + cNAME] = ns_data = ns_data || {};
+	}
+	
+	function StoreWork()
+	{
+		var stream = Stream.openFile(cPATH, "w+");
+		assert(stream);
+		
+		ns_data.version = cVERSION;
+		stream.printf("%V\n", ns_data);
+		stream.close();
+		
+		//stdout.printf("%V\n", ns_data);
+		//log("StoreWork");
+		//console.log(ns_data);
+	}
+}
+
+
+if(!View["settings-" + Settings.cNAME])
+{
+	Settings.RestoreWork();
+
+	if(!Settings.ns_data.config)
+		Settings.ns_data.config = {};
+}
+Settings.ns_data = View["settings-" + Settings.cNAME];

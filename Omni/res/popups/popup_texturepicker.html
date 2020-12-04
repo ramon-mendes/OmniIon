@@ -1,0 +1,116 @@
+﻿<html nomove=true>
+<script type="text/tiscript">
+	include "popup_common.tis";
+
+	var params = view.parameters;
+	var cur_url;
+	var exedir = View.Proxy_view.Host_GetExeDir();
+	
+	System.scanFiles(exedir + "/textures/*.*", function(filename, attributes) {
+		if(attributes & System.IS_DIR)
+			return true;
+		
+		var bgurl = "file:///" + exedir + "/textures/" + filename;
+		self#list.$append(<div .wrap><div .texture style="background-image: url({bgurl})" title="{filename}" /></div>);
+		return true;
+	});
+
+	self.on("click", ".texture", function(evt) {
+		this.parent.state.current = true;
+		cur_url = this.style#background-image;
+		
+		if(params.what==#bg)
+			params.el.style#background-image = "url(" + cur_url + ")";
+		else
+			params.el.style#foreground-image = "url(" + cur_url + ")";
+	});
+
+	self#btn-copycss.onClick = function() {
+		if(cur_url)
+			view.clipboard(#put, cur_url);
+	};
+
+	self#btn-transform.onClick = function() {
+		this.popup(self#elmenu-menu-touch);
+	};
+
+	self#btn-transform.onControlEvent = function(evt) {
+		if(evt.type==Event.MENU_ITEM_CLICK)
+		{
+			switch(evt.target.@#command)
+			{
+				case "background-color": console.colorpick(params.el, #background-color); break;
+				case "touch-bg-hue-saturation": console.colortouch(params.el, #bg, #hue-saturation); break;
+				case "touch-bg-colorize": console.colortouch(params.el, #bg, #colorize); break;
+				case "touch-bg-cbg": console.colortouch(params.el, #bg, #cbg); break;
+			}
+		}
+	};
+</script>
+
+<style>
+	@import url(../style/global.css);
+	@import url(popup_common.css);
+	@import url(../lib_menu/menu-chrome.css);
+
+	html { size: 290px 340px; }
+
+	#list
+	{
+		flow: horizontal-flow;
+		height: *;
+		overflow-y: auto;
+		padding: 1px 0;
+	}
+	.wrap
+	{
+		size: 50px;
+		margin: 1px 2px;
+	}
+	.wrap .texture
+	{
+		size: *;
+		border: solid 1px silver;
+		border-radius: 3px;
+		cursor: pointer;
+	}
+	.wrap:current .texture { border: 3px @CLR_BLUE; }
+
+	.area-actions
+	{
+		min-width: max-content;
+		padding: 4px;
+		background: #f3f3f3;
+		border-top: solid 1px silver;
+		text-align: right;
+	}
+</style>
+
+<menu .menu-chromed.gambi #elmenu-menu-touch>
+	<div .inner>
+		<ul>
+			<li command="background-color">#background-color</li>
+			<hr />
+			<li command="touch-bg-hue-saturation">hue/saturation</li>
+			<li command="touch-bg-colorize">colorize</li>
+			<!--<li command="touch-bg-clrschema">clrschema</li>-->
+			<li command="touch-bg-cbg">cbg</li>
+		</ul>
+	</div>
+</menu>
+
+<body>
+	<div #area-header title="Press ESC to close">
+		<img src="../img/hud_resize_corner.png" />
+		<header />
+		<close />
+	</div>
+
+	<div #list />
+
+	<section .area-actions>
+		<button .std-btn #btn-transform><i .ft.ft-picture-3 />&nbsp;Transform</button>
+		<button .std-btn #btn-copycss><i .ft.ft-docs />&nbsp;Copy URL</button>
+	</section>
+</body>
+</html>

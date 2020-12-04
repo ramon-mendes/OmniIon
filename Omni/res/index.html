@@ -1,0 +1,221 @@
+﻿<!-- OmniView:on -->
+<html .index>
+<head>
+	<style>
+		@import url(style/global.css);
+		@import url(style/index.css);
+		@import url(lib_menu/menu-chrome.css);
+
+		html[blur] { background-color: transparent; }
+		html[blur] #page-toolbar { background: transparent; }
+	</style>
+
+	<script type="text/tiscript">
+		if(!View.Proxy_NS)
+			View.Proxy_NS = (::this)();
+	</script>
+
+	<script type="text/tiscript">
+		include "lib_settings/settings.tis";
+		include "tis/consts.tis";
+		include "tis/state.tis";
+
+		View.Proxy_view = view;
+		
+		// -------------------------------------------------------------------
+		self#main-home.onExchange =
+		self#page-toolbar.onExchange = function(evt) 
+		{
+			if(evt.type == Event.X_DRAG_ENTER)
+			{
+				return true;
+			}
+			else if(evt.type == Event.X_DRAG_LEAVE)
+			{
+				return true;
+			}
+			else if(evt.type == Event.X_DRAG)
+			{
+				if(evt.draggingDataType != #file && evt.draggingDataType != #text)
+					return false;
+				return true;
+			}
+			else if(evt.type == Event.X_DROP)
+			{
+				if(evt.draggingDataType != #file && evt.draggingDataType != #text)
+					return false;
+
+				var fn;
+				if(typeof evt.dragging == #array)
+					fn = evt.dragging[0];
+				else
+					fn = evt.dragging;
+
+				view.Host_OpenFile(fn);
+				return true;
+			}
+		};
+
+		// -------------------------------------------------------------------
+		// UX common
+		var topmost = false;
+		function UX_ToggleTopmost()
+		{
+			topmost = !topmost;
+			view.windowTopmost = topmost;
+			self#mi-alwaystop.$(button).state.checked = topmost;
+		}
+		function UX_ToggleAutoRefresh()
+		{
+			var el_btn1 = $(#menu-main #mi-autorefresh button);
+			var el_btn2 = $(#page-toolbar #mi-autorefresh button);
+			var check
+				= el_btn1.state.checked
+				= el_btn2.state.checked
+				= !el_btn1.state.checked;
+			
+			el_btn1.timer(check ? 100 : 0, function() {
+				if(!State._shown)
+					return false;
+				
+				var date_last = view.Host_GetFileLastWrite(URL.toPath(State._page_url));
+				
+				var date_prev = State._data.date_prev;
+				if(date_prev == undefined)
+					date_prev = State._data.date_prev = date_last;
+				if(date_last != date_prev)
+					State.ReloadPage();
+				return true;
+			});
+		}
+
+		function UX_EditFile()
+		{
+			if(State._shown)
+			{
+				var editor = Settings.ns_data.config.editorpath;
+				if(!editor)
+					view.msgbox(#information, "You need to configure an editor executable in order to edit files.", Consts.APPNAME);
+				else
+				{
+					var path = URL.toPath(State._page_url);
+					if(Utils.IsWindows)
+						System.exec(editor, path);
+					else
+						view.Host_Exec(editor, path, false);
+				}
+			}
+		}
+		
+		// -------------------------------------------------------------------
+		// Toolbar / Keyboard
+		include "tis/toolbar.tis";
+		include "tis/keyboard.tis";
+	</script>
+
+	<menu #menu-main .menu-chromed .outline>
+		<div .inner>
+			<ul>
+				<li #mi-close>Close page<accesskey osx="⌘ + W" win="Ctrl + W" /></li>
+			</ul>
+
+			<hr />
+
+			<div #mi-file>
+				<ul>
+					<li #mi-edit>Edit file<accesskey osx="⌘ + E" win="Ctrl + E" /></li>
+					<li #mi-reload>Reload file<accesskey osx="⌘ + R" win="F5 or Ctrl + R" /></li>
+					<li #mi-reveal>Reveal file<accesskey osx="⌘ + F" win="Ctrl + F" /></li>
+					<li #mi-autorefresh>Auto-refresh on file update<button |toggler2><label .true>On</label><label .false>Off</label></button></li>
+				</ul>
+
+				<hr />
+			</div>
+
+			<ul>
+				<li #mi-config>Configurations<accesskey>F9</accesskey></li>
+				<li #mi-exit>Exit</li>
+			</ul>
+		</div>
+	</menu>
+</head>
+
+<body>
+	<div #main-home>
+		<frame src="home/home.html" #frame-home />
+	</div>
+
+	<div #main-page>
+		<div #page-toolbar>
+			<widget #btn-main>menu</widget>
+
+			<widget #btn-reload title="Reload">
+				<i .icon-arrows-cw />
+			</widget>
+
+			<widget #btn-voptions title="View options" align-popup="right">
+				<i .icon-monitor />
+				<menu .popup>
+					<li #mi-autorefresh>Auto-refresh on file update&nbsp;<button |toggler2><label .true>On</label><label .false>Off</label></button></li>
+					<li #mi-alwaystop>Always on top<button |toggler2><label .true>On</label><label .false>Off</label></button></li>
+					<li>
+						Blur behind window
+						<menu #mi-aero>
+							<li .radio value="none" checked><span /> None</li>
+							<li .radio value="auto"><span /> Auto</li>
+							<li .radio value="ultra-dark"><span /> Ultra-dark</li>
+							<li .radio value="dark"><span /> Dark</li>
+							<li .radio value="light"><span /> Light</li>
+							<li .radio value="ultra-light"><span /> Ultra-light</li>
+						</menu>
+					</li>
+				</menu>
+			</widget>
+
+			<widget #btn-toolbox title="Magic toolbox" align-popup="right">
+				<i .icon-magic /><i class="ft ft-magic"></i>
+				<menu .popup>
+					<li #mi-screenshot>Save screenshot</li>
+					<li>
+						CSS: font rendering mode
+						<menu #menu-font>
+							<li .radio value="default" checked><span /> Default (enhanced)</li>
+							<li .radio value="classic-normal"><span /> Classic</li>
+							<li .radio value="enhanced-normal"><span /> Enhanced</li>
+						</menu>
+					</li>
+					<li>
+						CSS: smooth scrolling
+						<menu #menu-smoothscroll>
+							<li .radio value="default" checked><span /> Default (enabled)</li>
+							<li .radio value="disable"><span /> Disable</li>
+						</menu>
+					</li>
+				</menu>
+			</widget>
+
+			<widget #btn-sciter-inspector title="Connect to inspector.exe" .hide>
+				<i .icon-plug-1 />
+			</widget>
+
+			<widget #btn-debugger title="Debugger for TIScript" .hide>
+				<i .icon-bug />
+			</widget>
+
+			<widget #btn-inspector title="Toggle inspector">
+				<i .icon-target />
+			</widget>
+		</div>
+
+		<frameset rows="*,*">
+			<frame #frameph />
+
+			<splitter #inspector-splitter />
+
+			<div #inspector-wrap>
+				<include src="inspector/inspector.html" />
+			</div>
+		</frameset>
+	</div>
+</body>
+</html>

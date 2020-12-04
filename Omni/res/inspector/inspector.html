@@ -1,0 +1,518 @@
+﻿<style>
+	@import url(inspector/inspector.css);
+</style>
+
+<script type="text/tiscript">
+	include "inspector/inspector.tis";
+	include "inspector/console.tis";
+	include "inspector/network.tis";
+	include "lib_settings/settings.tis";
+
+	namespace Inspector
+	{
+		var is_shown = false;
+
+		function ToggleInspector()
+		{
+			//view.Host_Dbg();
+			is_shown = !is_shown;
+			self.@#show-inspector = is_shown ? true : undefined;
+			self#inspector-wrap.update();
+			view.update();
+		}
+
+		function ShowInspector(itab = undefined)
+		{
+			is_shown = true;
+			self.@#show-inspector = true;
+			if(itab !== undefined)
+				$$(#topbar > .btn)[itab].sendEvent("click");
+		}
+
+		function ShowInspectorMiniConsole()
+		{
+			ShowInspector(0);
+			self#inspecting-topbar.$$(.btn)[3].sendEvent("click");
+		}
+	}
+
+
+	function Extern_InspectorReset()
+	{
+		// clear inspected CSS listings
+
+		// clear console(s)
+		self#main-console.Clear();
+
+		//if(console_popup && console_popup.state!=null)
+		//	console_popup.root.$(#popup-console).Clear();
+
+		// clear network
+		self#net-table.$(tbody).clear();
+		self.closePopup();
+	}
+
+	function Extern_ConsoleAppendLines(data)
+	{
+		self#main-console.InsertLines(data);
+		self#main-console.UpdateCounters(data);
+
+		//if(console_popup && console_popup.state!=null)
+		//    console_popup.root.$(#popup-console).InsertLines(data);
+		if(View.Fiddler_AppendConsoleLines)
+			View.Fiddler_AppendConsoleLines(data);
+	}
+	function Extern_ConsoleAppendValuesLine(arr_vals)
+	{
+		self#main-console.InsertValues(arr_vals);
+
+		//if(console_popup && console_popup.state!=null)
+		//	console_popup.root.$(#popup-console).InsertValues(arr_vals);
+	}
+
+	function Extern_InspectElement(el)
+	{
+		/*if(self.el_menupopup)
+			self.el_menupopup.remove();
+		self.el_menupopup = self#elmenu.clone();
+		self.el_inspect = el;
+		self.insert(self.el_menupopup);
+
+		var (x,y) = view.cursorLocation();
+		self.popup(self.el_menupopup, x + 8, y);
+
+		AttachElmenuHandlers();*/
+	}
+
+	function Extern_OutlineElement(el)
+	{
+		//log("Extern_OutlineElement");
+		self.paintForeground = function(gfx) {
+			if(el.parent==null)
+				return;
+			if(!el.isVisible)
+				return;
+
+			var (x,y,w,h) = el.box(#rectw, #padding, #view);
+			var (fw, fh) = self#frameph[0].box(#dimension);
+			var startx = 49;
+
+			// fill
+			gfx.fillColor(color(148,143,223, 0.4));
+			gfx.rectangle(x,y,w,h);
+
+			// lines
+			gfx.strokeWidth(1).strokeColor(color(0,136,204)).strokeDash(#dashed);
+			gfx.translate(0.5, 0.5);
+			gfx.line(startx, y, startx+fw, y);
+			gfx.line(startx, y+h-1, startx+fw, y+h-1);
+			gfx.line(x, 0, x, fh);
+			gfx.line(x+w-1, 0, x+w-1, fh);
+			return true;
+		};
+		self.refresh();
+	}
+
+	function Extern_OutlineClear()
+	{
+		self.paintForeground = undefined;
+		self.refresh();
+	}
+
+	// ----------------------------------------------------------------------------------
+	self#inspector-wrap.style#height = 240px;
+
+	self#topbar.paintForeground = function(gfx) {
+		gfx.fillColor(color(0,0,0,0.039)).rectangle(0, 26, this.box(#width), 2);
+	};
+
+	Inspector.ToggleInspector();
+
+</script>
+
+<script type="text/tiscript">
+	/*
+		// .elmenu
+		self.on("click", ".elmenu button", function() {
+			var cmd = this.@#command;
+			if(cmd=="color")
+				this.parent.popup( self#elmenu-menu-color, Utils.popupAttachment(1, 7) );
+
+			else if(cmd=="touch")
+				this.parent.popup( self#elmenu-menu-touch, Utils.popupAttachment(1, 7) );
+
+			else if(cmd=="texture")
+			{
+				console.texturepick(self.el_inspect);
+				Extern_OutlineClear();
+				self.el_menupopup.remove();
+			}
+
+			else if(cmd=="font")
+			{
+				console.fontpick(self.el_inspect);
+				Extern_OutlineClear();
+				self.el_menupopup.remove();
+			}
+		});
+
+		function AttachElmenuHandlers()
+		{
+			self.el_menupopup.onControlEvent = function(evt)
+			{
+				if(evt.type==Event.MENU_ITEM_CLICK)
+				{
+					switch(evt.target.@#command)
+					{
+					case "color-background": console.colorpick(self.el_inspect, #background-color); break;
+					case "color-foreground": console.colorpick(self.el_inspect, #foreground-color); break;
+					case "color-outline": console.colorpick(self.el_inspect, #outline-color); break;
+					case "color-border": console.colorpick(self.el_inspect, #border-color); break;
+					case "color-color": console.colorpick(self.el_inspect, #color); break;
+
+					case "touch-bg-hue-saturation": console.colortouch(self.el_inspect, #bg, #hue-saturation); break;
+					case "touch-bg-colorize": console.colortouch(self.el_inspect, #bg, #colorize); break;
+					case "touch-bg-cbg": console.colortouch(self.el_inspect, #bg, #cbg); break;
+					case "touch-fg-hue-saturation": console.colortouch(self.el_inspect, #fg, #hue-saturation); break;
+					case "touch-fg-colorize": console.colortouch(self.el_inspect, #fg, #colorize); break;
+					case "touch-fg-cbg": console.colortouch(self.el_inspect, #fg, #cbg); break;
+					}
+
+					Extern_OutlineClear();
+					self.el_menupopup.remove();
+				}
+			}
+		}
+	*/
+</script>
+
+<script type="text/tiscript">
+	// Tab handling - topbar
+	{
+		self#tab-console.on_show = function() {
+			this.$(.console-prompt widget).state.focus = true;
+		};
+		self#topbar.on("click", ".btn", function(e)
+		{
+			this.state.current = true;
+			var el_tab = $$(#tabs .tab)[this.index];
+			el_tab.state.current = true;
+			if(el_tab.on_show)
+				el_tab.on_show();
+		});
+		$$(#topbar > .btn)[0].sendEvent("click");
+	}
+
+	// Inspector tab
+	{
+		var el_sep_left;
+		var el_sep_right;
+		self#inspecting-topbar.on("click", ".btn", function(e)
+		{
+			this.state.current = true;
+
+			if(el_sep_left) el_sep_left.@.removeClass("hide");
+			if(el_sep_right) el_sep_right.@.removeClass("hide");
+			el_sep_left = this.prior;
+			el_sep_right = this.next;
+			if(el_sep_left) el_sep_left.@.addClass("hide");
+			if(el_sep_right) el_sep_right.@.addClass("hide");
+
+			var itab = this.@#itab.toInteger();
+			var el_tab = self#inspecting-tabs[itab];
+
+			var bug = self#inspecting-tabs.$(:current);
+			if(bug) bug.state.current = false;
+
+			el_tab.state.current = true;
+			//el_tab.state.focus = true;
+			if(el_tab.on_show)
+				el_tab.on_show();
+
+			Settings.ns_data.tab_inspecting = itab;
+		});
+
+		self#btn-evaluated.onClick = function() {
+			var el = view.Host_GetInspectedElement();
+			if(el)
+				console.show(el);
+		};
+
+		self#itab-this.on_show = function() {
+			this.$(.console-prompt widget).state.focus = true;
+		};
+
+		self#btn-iclose.onClick = ::Inspector.ToggleInspector();
+
+		var itab = Settings.ns_data.tab_inspecting || 0;
+		$$(#inspecting-topbar > .btn)[itab].sendEvent("click");
+	}
+
+	// Console tab
+	{
+		self#tab-console.$(.clear).onClick = ::self#main-console.Clear();
+	}
+</script>
+
+
+<!-- Hidden elements -->
+<popup #elmenu.elmenu>
+	<button command="color" title="Color-pick a CSS attribute value"><i .ft.ft-color-adjust /></button>
+	<button command="touch" title="Color-touch CSS background or foreground image"><i .ft.ft-picture /></button>
+	<button command="texture" title="Texture image picker for background"><i .ft.ft-picture-1 /></button>
+	<button command="font" title="Font-picker"><i .ft.ft-fontsize /></button>
+</popup>
+
+<menu .menu-chromed.gambi #elmenu-menu-color>
+	<div .inner>
+		<ul>
+			<li command="color-color">#color</li>
+			<li command="color-background">#background-color</li>
+			<li command="color-foreground">#foreground-color</li>
+			<li command="color-outline">#outline-color</li>
+			<li command="color-border">#border-color</li>
+		</ul>
+	</div>
+</menu>
+
+<menu .menu-chromed.gambi #elmenu-menu-touch>
+	<div .inner>
+		<caption>background-image</caption>
+		<ul>
+			<li command="touch-bg-hue-saturation">hue/saturation</li>
+			<li command="touch-bg-colorize">colorize</li>
+			<!--<li command="touch-bg-clrschema">clrschema</li>-->
+			<li command="touch-bg-cbg">cbg</li>
+		</ul>
+
+		<caption>foreground-image</caption>
+		<ul>
+			<li command="touch-fg-hue-saturation">hue/saturation</li>
+			<li command="touch-fg-colorize">colorize</li>
+			<!--<li command="touch-fg-clrschema">clrschema</li>-->
+			<li command="touch-fg-cbg">cbg</li>
+		</ul>
+	</div>
+</menu>
+
+
+<menu .context #console-menu>
+	<li command="clear">Clear</li>
+	<li command="copy">Copy</li>
+</menu>
+
+<menu .context #tree-menu>
+	<!--<li command="tools">Quick tools</li>-->
+	<li command="data">Data inspector</li>
+	<li command="remove">Remove element</li>
+	<hr />
+	<li command="copyhtml">Copy HTML</li>
+</menu>
+
+<menu .context #network-menu>
+	<li command="clear">Clear list</li>
+	<li command="copy">Copy URL</li>
+	<li command="open">Open URL as page</li>
+</menu>
+
+
+<popup #netpreview-img>
+	<header>Image resource preview</header>
+	<div .area-img></div>
+</popup>
+
+<popup #netpreview-txt>
+	<header>Text resource previw</header>
+	<pre .area-txt />
+</popup>
+
+<popup #snippets>
+	<frame src="popups/popup_snippet.html" />
+</popup>
+
+<div #topbar>
+	<div .btn><i .icon-target /> Inspector</div>
+	<div .btn>
+		<i .icon-terminal />
+		Console
+		<div .stat-icon.warn>
+			<span>0</span><i .icon-attention />
+		</div>
+		<div .stat-icon.error>
+			<span>0</span><i .icon-cancel />
+		</div>
+	</div>
+	<div .btn><i .icon-article-alt style="font-size: 14px" /> Network</div>
+	<div .btn><i .icon-chart-line /> Performance</div>
+	<i #btn-iclose .icon-cancel-circled />
+</div>
+
+<div #tabs>
+	<div #tab-inspector.tab current checked>
+		<frameset cols="*,430px">
+			<section #treeing>
+				<widget !tree #dom-tree />
+				<!--<option value="1">
+					<text>html</text>
+
+					<option value="2">
+						<text>body</text>
+
+						<option value="3">
+							<text>div</text>
+						</option>
+					</option>
+				</option>-->
+
+				<div #tag-path>
+					<script type="text/tiscript">
+						self#msg[0].text = (Utils.IsOSX ? "COMMAND" : "CTRL") + " + SHIFT + click";
+					</script>
+					<div #msg><strong /> any element in the view to select it in the DOM tree</div>
+					<div #tags />
+				</div>
+			</section>
+
+			<splitter />
+
+			<section #inspecting>
+				<div #inspecting-topbar>
+					<div .btn itab="0">Computed</div>
+					<span .sep />
+					<div .btn itab="1">Rules</div>
+					<span .sep />
+					<div .btn itab="2">Box</div>
+					<span .sep />
+					<div .btn itab="3">Script this</div>
+				</div>
+
+				<div #inspecting-tabs>
+					<section #itab-computed>
+						<div .overflow-wrap>
+							<header style="border-top: none">Evaluated props<i #btn-evaluated.icon-plus title="Data inspector" /></header>
+							<ul #list-elprops />
+
+							<header>State</header>
+							<ul #list-states />
+
+							<header>Style</header>
+							<ul #list-computed />
+						</div>
+					</section>
+
+					<section #itab-rules .overflow-wrap>
+						<div #list-rules />
+					</section>
+
+					<section #itab-box .overflow-wrap>
+						<div #box-ux>
+							<code />
+
+							<div .cssbox#box-margin>
+								<div .mflow>
+									<div .vside></div>
+									<div .hside></div>
+									<div .filler />
+									<div .hside></div>
+									<div .vside></div>
+								</div>
+
+								<div .cssbox#box-border>
+									<div .mflow>
+										<div .vside></div>
+										<div .hside></div>
+										<div .filler />
+										<div .hside></div>
+										<div .vside></div>
+									</div>
+
+									<div .cssbox#box-padding>
+										<div .mflow>
+											<div .vside></div>
+											<div .hside></div>
+											<div .filler />
+											<div .hside></div>
+											<div .vside></div>
+										</div>
+
+										<div .cssbox#box-content>
+											-
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<dl>
+								<dt>flow:</dt>
+								<dd></dd>
+
+								<dt>position:</dt>
+								<dd></dd>
+
+								<dt>display:</dt>
+								<dd></dd>
+
+								<dt>visibility:</dt>
+								<dd></dd>
+
+								<dt>overflow:</dt>
+								<dd></dd>
+							</dl>
+						</div>
+					</section>
+
+					<section #itab-this .console-style>
+						<select|list .console-output #this-console />
+
+						<div .console-prompt>
+							<i .icon-angle-double-right />
+							<widget type="text" />
+							<button title="Snippets library"><i .icon-list-bullet /></button>
+						</div>
+					</section>
+				</div>
+			</section>
+		</frameset>
+	</div>
+
+	<div #tab-console.tab.console-style>
+		<div .category-bar>
+			<!--<button .btn-info><span .bullet.blue />Info</button>
+			<button .btn-warning><span .bullet.orange />Warning</button>
+			<button .btn-error><span .bullet.red />Error</button>-->
+			<button .clear>Clear</button>
+		</div>
+
+		<select|list .console-output #main-console />
+
+		<div .console-prompt>
+			<i .icon-angle-double-right />
+			<widget type="text" />
+			<button title="Snippets library"><i .icon-list-bullet /></button>
+		</div>
+	</div>
+
+	<div #tab-network.tab>
+		<table #net-table resizeable>
+			<thead>
+				<tr>
+					<td style="width: 5px">Status</td>
+					<td>File</td>
+					<td>URL</td>
+					<td>Size</td>
+					<td>Load time</td>
+					<td>Principal</td>
+					<td>Type</td>
+					<!--<td>Initiator</td>-->
+				</tr>
+			</thead>
+
+			<tbody />
+		</table>
+	</div>
+
+	<div #tab-performance.tab.wip>
+		<img src="img/under-construction.gif" />
+		<h5>Suggestion for this area are welcome!</h5>
+	</div>
+</div>

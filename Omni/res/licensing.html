@@ -1,0 +1,172 @@
+﻿<!-- OmniView:on -->
+<html>
+<head>
+	<script type="text/tiscript">
+		var expando = view.Host_IonExpando();
+
+		// Main UI ---------------------------------------------------------------
+		self#btn-buy.onClick = ::Sciter.launch("http://misoftware.com.br/Omni");
+		self#eula.onClick = ::Sciter.launch("http://misoftware.com.br/Omni/EULA");
+
+		self#btn-register.onClick = function() {
+			self#main-section.style#visibility = "none";
+			self#main-register.style#visibility = "visible";
+		};
+
+		self#btn-trial.onClick = function() {
+			self.state.disabled = true;
+			expando.activate(function(ok, msg) {
+				if(!ok)
+					view.msgbox(#alert, "Could not start your trial period.", "Omni");
+				view.close();
+			});
+		};
+
+		if(expando.active)
+		{
+			assert(expando.is_trial);
+			self#btn-trial.text = "Continue Trial";
+			self#remaining.text = expando.rd + " days remaining";
+			self#remaining.show();
+		}
+		if(expando.status == "EXPIRED")
+		{
+			self#expired.show();
+			self#btn-trial.state.disabled = true;
+		}
+		
+		// Register UI ---------------------------------------------------------------
+		self#btn-reg-cancel.onClick = function() {
+			self#main-section.style#visibility = "visible";
+			self#main-register.style#visibility = "none";
+		};
+
+		self#btn-reg-register.onClick = function() {
+			if(!self#txt-name.value)
+			{
+				view.msgbox(#information, "Please provide the 'Name'", "Omni");
+				return;
+			}
+			if(!self#txt-email.value)
+			{
+				view.msgbox(#information, "Please provide the 'E-mail'", "Omni");
+				return;
+			}
+			if(!self#txt-license.value)
+			{
+				view.msgbox(#information, "Please provide the 'License key'", "Omni");
+				return;
+			}
+			if(!self#chk-eula.value)
+			{
+				view.msgbox(#information, "Please agree with the EULA", "Omni");
+				return;
+			}
+
+			self.state.disabled = true;
+			expando.activate(function(ok, msg) {
+				if(ok)
+					view.msgbox(#information, "Registration completed with success!", "Omni");
+				else
+					view.msgbox(#alert, "Failed to register Omni. " + msg, "Omni");
+				view.close();
+			}, self#txt-name.value, self#txt-email.value, self#txt-license.value);
+		};
+
+		view.focus = self#btn-trial;
+	</script>
+
+	<style>
+		@import url(style/global.css);
+
+		#main-section { size: *; }
+		#main-section section { padding: 30px; height: *; }
+
+		#area-title
+		{
+			font-size: 19px;
+		}
+		#area-title strong { display: inline-block; font-size: 50px; margin-right: 10px }
+		#area-btns { margin-top: 30px; }
+
+		#area-btns { flow: horizontal; border-spacing: 10px; vertical-align: middle; }
+		#area-btns button { flow: vertical; font-size: 21px; padding: 7px 19px; }
+		#area-btns button.trial { background: #a1d285; }
+		#area-btns button.trial:hover { background: #709a58; }
+		#area-btns code { color: gray; font-weight: bold; visibility: none; }
+
+		#area-brand { flow: stack; background-image: url(img/bg_blue.png); }
+		#area-brand img { display: block; width: 190px; margin: * 0; }
+	</style>
+
+	<style>
+		#main-register { size: *; visibility: none; }
+		#main-register hr { margin: 25px 0; border: none; border-bottom: solid 1px silver; }
+		#main-register div { flow: horizontal; margin: 10px 0; vertical-align: middle; border-spacing: 4px; }
+		#main-register strong,
+		#main-register span { width: 160px; font-size: 15px; }
+		#main-register widget { width: *; padding: 6px 4px; }
+		#main-register .buttons { horizontal-align: right }
+		#main-register .buttons button { font-size: 17px; padding: 3px 12px; }
+		#main-register h3 { font-size: 28px; font-weight: normal; text-align: right; margin-bottom: 0; }
+	</style>
+</head>
+
+<body>
+	<div #main-section>
+		<section #area-brand>
+			<img src="img/logo_shadow.png">
+		</section>
+
+		<section>
+			<div #area-title>
+				<strong>Omni</strong> MI Software
+			</div>
+
+			<div #area-btns>
+				<button .std-btn #btn-buy>Buy Now</button>
+				<button .std-btn #btn-register>Register</button>
+				<button .std-btn.trial #btn-trial>Start Trial</button>
+				<code #expired>Your trial has expired</code>
+				<code #remaining />
+			</div>
+		</section>
+	</div>
+	
+	<div #main-register>
+		<section style="padding: * 25px;">
+			Register your product by entering the following information:
+			<div>
+				<strong>Name:</strong>
+				<widget !text #txt-name />
+			</div>
+
+			<div>
+				<strong>E-mail:</strong>
+				<widget !text #txt-email />
+			</div>
+
+			<div>
+				<strong>License key:</strong>
+				<widget !text #txt-license />
+			</div>
+			
+			<div style="horizontal-align: right">
+				<label><input !checkbox #chk-eula /> I have readed and agree with the <a href="" #eula>EULA</a>&nbsp;</label>
+			</div>
+			<div style="horizontal-align: right">
+				You must have internet access in order to register your product
+			</div>
+
+			<div .buttons>
+				<button .std-btn.trial#btn-reg-register>Register</button>
+			</div>
+		</section>
+
+		<section style="background: #00a0e6; color: white; flow: horizontal; padding: 20px 25px;">
+			<button .std-btn#btn-reg-cancel style="margin-right: *">Go back</button>
+			MI Software
+		</section>
+	</div>
+</body>
+</html>

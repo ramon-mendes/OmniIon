@@ -1,0 +1,49 @@
+html
+{
+	background: none;
+	size: 450px 300px;
+}
+body
+{
+	margin: 0;
+	border: solid 1px #656d76;
+	background: #f3f3f3;
+	overflow: hidden;
+	//border-radius: 3px;
+}
+
+#area-header
+{
+	flow: horizontal;
+	height: 23px;
+	background: rgb(168,182,197) url(../img/grid2.png);
+}
+
+#area-header img
+{
+	display: block;
+	cursor: nw-resize;
+}
+
+#area-header header
+{
+	size: *;
+	margin-left: 5px;
+	margin-top: 2px;
+	cursor: move;
+	font-size: 12px;
+	text-wrap: none;
+	text-shadow: 0px -1px #484d53;
+	color: #b6c2c7;
+	font-weight: 600;
+}
+#area-header close
+{
+	size: 16px;
+	display: block;
+	margin: * 3px * 0;
+	background: url(../img/close2.png) no-repeat;
+	hit-margin: 3px;
+}
+#area-header close:hover { background-position: -16px 0; }
+#area-header close:active { background-position: -32px 0; }

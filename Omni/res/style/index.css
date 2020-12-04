@@ -1,0 +1,86 @@
+#main-home
+{
+	size: *;
+}
+
+#main-page
+{
+	visibility: none;
+	size: *;
+	flow: horizontal;
+}
+[show-page] #main-home { visibility: none; }
+[show-page] #main-page { visibility: visible; }
+
+#inspector-wrap { visibility: none; }
+splitter#inspector-splitter { visibility: none; height: 3px; background: #f0f0f0; }
+[show-inspector] #inspector-wrap { visibility: visible; }
+[show-inspector] splitter#inspector-splitter { visibility: visible; }
+
+#frameph
+{
+	height: *;
+}
+
+
+// #page-toolbar
+	#menu-main button[type=toggler2] { margin-left: 10px; }
+
+	#page-toolbar
+	{
+		flow: vertical;
+		width: 42px;
+		height: *;
+		padding: 3px;
+		background: #f5f7f8;
+		border-right: solid 1px silver;
+	}
+	@media on-glass
+	{
+		#page-toolbar { background: none; border: none; }
+	}
+
+	#page-toolbar widget#btn-main
+	{
+		margin: -3px;
+		margin-bottom: 5px;
+		background: #97d3f1;
+		color: #f5f7f8;
+		font-size: 12px;
+		border-radius: 0;
+		padding: 0;
+		height: 19px;
+	}
+	#page-toolbar widget#btn-main:hover,
+	#page-toolbar widget#btn-main:owns-popup
+	{
+		color: white;
+		background: #0064c8;
+	}
+
+	#page-toolbar widget
+	{
+		width: *;
+		padding: 8px 0;
+		margin-bottom: 2px;
+		background: none;
+		text-align: center;
+		border-radius: 3px;
+		//font-rendering-mode: enhanced;
+	}
+	#page-toolbar widget:hover,
+	#page-toolbar widget:owns-popup { background: #0064c8; color: white; }
+	#page-toolbar widget i { font-size: 22px; display: block; }
+
+	#page-toolbar widget#btn-toolbox,
+	#page-toolbar widget#btn-voptions { behavior: popup-menu; }
+	#page-toolbar widget > menu { display: none; min-width: 210px; }
+	#page-toolbar menu { margin-left: 3px; }
+	#page-toolbar menu li.radio
+	{
+		behavior: radio;
+		foreground: url(theme:radio-normal) no-repeat;
+		foreground-position: 7px center;
+	}
+	#page-toolbar menu li.radio:checked { foreground-image: url(theme:radio-checked-normal); }
+// end #page-toolbar

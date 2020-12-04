@@ -1,0 +1,203 @@
+﻿<!-- OmniView:on -->
+<html nomove=true>
+<script type="text/tiscript">
+	include "popup_common.tis";
+
+	var params = view.parameters;
+	var cur_font;
+
+	for(var f in ns_fonts)
+	{
+		var s = f.styles[0];
+		var el_opt = self#list.append(new Element(#option));
+		el_opt.style#font-family = "'" + s[2] + "'";
+		el_opt.text = f.name;
+		el_opt.data_font = f;
+		//self#list.$append(<option style="font-family: '{s[2]}';">{f.name}</option>);
+	}
+
+	self#list.onValueChanged = function() {
+		var f = this.$(option:current).data_font;
+		var s = f.styles[0];
+		cur_font = f;
+
+		self#styler.$(span).text = f.name;
+		self#styler.$(strong).text = f.styles.length + " style";
+
+		self#select-styles.options.clear();
+		for(var (i,s) in f.styles)
+		{
+			var txt = s[0];
+			if(s.length==4)
+			{
+				var opts = [];
+				if(s[3].italic)
+					opts.push("italic");
+				if(s[3].weight)
+					opts.push("weight " + s[3].weight);
+
+				txt += " (" + opts.join(", ") + ")";
+			}
+
+			self#select-styles.options.$append(<option value={i}>{txt}</option>);
+		}
+		self#select-styles.value = 0;
+		self#select-styles.onValueChanged();
+	};
+
+	self#select-styles.onValueChanged = function() {
+		var s = cur_font.styles[this.value];
+		var ff = "'" + s[2] + "'";
+		self#ff-val.value = ff;
+		params.el.style#font-family = ff;
+	};
+
+	self#btn-copy-ff.on("click", function() {
+		view.clipboard(#put, self#ff-val.value);
+	});
+
+	self#btn-copy-clr.on("click", function() {
+		view.clipboard(#put, self#clr-val.value);
+	});
+</script>
+
+<script type="text/tiscript">
+	self#btn-bold.onClick = function() {
+		if(this.state.checked)
+			params.el.style#font-weight = "bold";
+		else
+			params.el.style#font-weight = undefined;
+	};
+
+	self#btn-italic.onClick = function() {
+		if(this.state.checked)
+			params.el.style#font-style = "italic";
+		else
+			params.el.style#font-style = undefined;
+	};
+
+	self#input-fs.on("focusin", function() {
+		if(this.value==undefined)
+			this.value = params.el.style#font-size.toInteger();
+	})
+	self#input-fs.onValueChanged = function() {
+		params.el.style#font-size = px(this.value);
+	};
+</script>
+
+<script type="text/tiscript">
+	include "lib_colorpicker/colorpicker.tis";
+
+	var has_color = false;
+	var el_colorpicker;
+
+	self#btn-chk-color.on("click", function(evt) {
+		has_color = true;
+		this.parent.remove();
+		self#area-colorpick.style#visibility = "visible";
+		el_colorpicker.readColor();
+	});
+
+	self.post(function() {
+		el_colorpicker = self#area-colorpick.$(frame)[0].$(.color-picker);
+		el_colorpicker.onUpdateColor = function(clr, h, s, l)
+		{
+			if(!has_color)
+				return;
+
+			if(clr.a==255)
+			{
+				var rgb = clr.toString(#RGB).toUpperCase();
+				self#clr-val.value = rgb;
+			} else {
+				var rgba = String.printf("rgba(%i,%i,%i,%.2f)", clr.r, clr.g, clr.b, clr.opacity);
+				self#clr-val.value = rgba;
+			}
+			params.el.style#color = clr;
+		}
+	});
+</script>
+
+<style>
+	@import url(../style/global.css);
+	@import url(popup_common.css);
+
+	html { size: 440px 360px; }
+
+	#main { size: *; flow: horizontal; }
+
+	#list
+	{
+		size: 220px *;
+		display: block;
+		padding: 0;
+		overflow-y: auto;
+		background: none;
+		font-size: 22px;
+	}
+	#list option { margin: 10px 0; }
+	#list option:current { background: #a3a1cb; color: white; }
+
+	#styler { size: *; padding: 10px; padding-bottom: 0; }
+	#styler section { margin-bottom: 8px; }
+	#styler select { display: block; margin-top: 1px; width: *; }
+	#tools { flow: horizontal; }
+	#tools .light { behavior: check; flow: horizontal; }
+	#tools .light i { margin-right: 3px; }
+	#tools .light:checked { background-image:url(theme:toolbar-button-pressed); }
+	#tools input { margin-left: 3px; }
+
+	#area-colorpick { visibility: none; }
+	#area-colorpick .color-picker { prototype: FontColorPicker; }
+	#area-colorpick .css { flow: horizontal; horizontal-align: right; padding-top: 3px; padding-right: 2px; font-size: 12px; }
+	#area-colorpick .css input { width: 70px; margin-left: 5px; }
+	#area-colorpick .css button { margin-left: 4px; }
+
+	.std-btn { font-size: 11px; }
+</style>
+
+<body>
+	<div #area-header title="Press ESC to close">
+		<img src="../img/hud_resize_corner.png" />
+		<header />
+		<close />
+	</div>
+
+	<div #main>
+		<select !list #list />
+
+		<div #styler>
+			<section>
+				<span /> - <strong />
+				<select #select-styles />
+			</section>
+
+			<section>
+				CSS font-family:<br>
+				<div style="flow: horizontal">
+					<input readonly #ff-val style="width: *; margin-right: 5px" /><button #btn-copy-ff.std-btn title="Copy"><i .ft.ft-docs /></button>
+				</div>
+			</section>
+
+			<hr>
+
+			<section #tools>
+				<button .light #btn-bold><i .ft.ft-bold /> bold</button>
+				<button .light #btn-italic><i .ft.ft-italic /> italic</button>
+				<input !integer #input-fs style="width: 45px" step=1 min=1 max=99999 />&nbsp;px
+			</section>
+
+			<section>
+				<label><input!checkbox #btn-chk-color />Change text color</label>
+				<div #area-colorpick>
+					<frame src="lib_colorpicker/colorpicker.html" />
+
+					<div .css>
+						CSS color: <input readonly #clr-val /><button #btn-copy-clr.std-btn title="Copy"><i .ft.ft-docs /></button>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+</body>
+</html>

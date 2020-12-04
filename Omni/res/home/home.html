@@ -1,0 +1,350 @@
+﻿<!-- OmniView:on -->
+<html>
+<head>
+	<script type="text/tiscript">
+		include "../lib_settings/settings.tis";
+		include "rfl.tis";
+
+		RFL.RestoreEntrys();
+
+		// Buttons
+		self#btn-open-file.onClick = function() {
+			var path = view.selectFile(#load, "HTML Files (*.htm,*.html)|*.HTM;*.HTML|All Files (*.*)|*.*" , "html");
+			if(path)
+				View.Proxy_NS.View_LoadURL(path, true);
+		};
+
+		self#btn-configurations.onClick = ::view.dialog(self.url("../config.html"));
+
+		Utils.installLinkHandler(self#section-welcome);
+		self#logos.on("click", "[href]", ::Sciter.launch(this.@#href));
+
+		class FileDropZone : Element 
+		{
+			event dragaccept (evt) {
+				return evt.draggingDataType == #file;
+			}
+
+			event dragenter (evt) 
+			{
+				this.attributes.addClass("active-dnd");
+				return true;
+			}  
+
+			event dragleave (evt) 
+			{
+				this.attributes.removeClass("active-dnd");
+				return true;
+			}  
+
+			event drag(evt) 
+			{
+				return true;
+			}  
+
+			event drop(evt) 
+			{
+				this.attributes.removeClass("active-dnd");
+
+				if(typeof(evt.dragging) == #array)
+				{
+					view.msgbox(#information, "You need to drop only one file");
+					return true;
+				}
+
+				View.Proxy_NS.View_LoadURL(evt.dragging, true);
+				return true;
+			}  
+		}
+    </script>
+
+	<style>
+		@import url(../style/global.css);
+		@const TXTCOLOR: #A8B6C5;
+
+		body
+		{
+			flow: vertical;
+			background: #f5f7f8;
+			prototype: FileDropZone;
+		}
+		body.active-dnd
+		{
+			outline: solid 4px #722CA8 -4px;
+		}
+
+		#area-main { height: *; flow: horizontal; }
+		#area-main > * { size: *; margin: 10px; }
+
+		section
+		{
+			margin-top: 10px;
+			padding: 13px 17px;
+			border: solid 1px #d1d8df;
+			border-radius: 4px;
+			background: white;
+		}
+
+		section .title
+		{
+			flow: horizontal;
+			vertical-align: middle;
+			font-size: 19px;
+			color: #0564c8;
+		}
+		section .title i { margin-left: *; margin-top: 3px; font-size: 14px; cursor: pointer; }
+	
+		#section-actions
+		{
+			flow: horizontal;
+			border-spacing: 10px;
+		}
+		#section-actions widget
+		{
+			width: *;
+			flow: horizontal;
+			padding: 13px 8px;
+			border-radius: 4px;
+			background: #97d3f1;
+			color: white;
+			font-size: 14px;
+		}
+		#section-actions widget i
+		{
+			margin-right: 5px;
+		}
+		#section-actions widget:hover
+		{
+			cursor: pointer;
+			background: @CLR_BLUE;
+		}
+
+		#section-rfl
+		{
+			size: *;
+			overflow: hidden;
+			color: @TXTCOLOR;
+		}
+		#section-rfl #rfl
+		{
+			size: *;
+			padding-top: 7px;
+			border-spacing: 1px;
+			font-family: Verdana;
+			text-wrap: none;
+		}
+		#section-rfl .dummy-entry { display: none; }
+		#section-rfl #rfl .entry
+		{
+			width: *;
+			flow: horizontal;
+			cursor: pointer;
+		}
+		#section-rfl #rfl .entry:hover { background: #eaeced; }
+		#section-rfl #rfl .entry:hover .col-btn { visibility: visible; }
+
+		#section-rfl #rfl .col
+		{
+			padding: 2px 0;
+			vertical-align: middle;
+		}
+		#section-rfl #rfl .col-file { width: 30px; vertical-align: middle; flow: horizontal; }
+		#section-rfl #rfl .col-file i { width: 18px; margin-left: 2px; font-size: 20px; }
+		#section-rfl #rfl .col-name
+		{
+			 size: *;
+			 overflow: hidden;
+			 text-overflow: path-ellipsis;
+		}
+		
+		#section-rfl .btn-check
+		{
+			flow: horizontal;
+			behavior: check;
+			cursor: pointer;
+			vertical-align: bottom;
+			margin-top: 2px;
+		}
+		#section-rfl .btn-check i
+		{
+			display: inline-block;
+			font-size: 16px;
+			width: 20px;
+			margin-bottom: -1px;
+		}
+		#section-rfl .btn-check .ft-check { visibility: none; }
+		#section-rfl .btn-check:checked .ft-check-empty { visibility: none; }
+		#section-rfl .btn-check:checked .ft-check { visibility: visible; }
+	</style>
+
+	<style>
+		#section-welcome { size: *; margin: 0; }
+		#section-welcome header { background-image: url(../img/grain.png); margin: -13px -17px; margin-bottom: 10px; padding: 15px; border-bottom: solid 1px #C0C0C0; }
+		#section-welcome h1 { margin: 0; font-family: Shumi; font-size: 42px; color: #722ca8; }
+		#section-welcome h2,
+		#section-essentials h2 { margin: 0; font-size: 14px; margin-top: 2px; margin-left: 2px; color: #de6767 }
+		#section-welcome main { size: *; overflow-y: auto; }
+		#section-welcome .s1 { height: *; border-bottom: solid 1px #C0C0C0; }
+		#section-welcome .s1 p { margin: 5px 0; }
+		#section-welcome .s1 pre { font-size: 13px; behavior: htmlarea; cursor: text; color: gray; }
+
+		#logos
+		{
+			margin-top: 3px;
+			flow: horizontal;
+			border-spacing: 6px;
+		}
+		#logos > div
+		{
+			flow: horizontal;
+			
+			size: 54px;
+			background-image: url(../img/grain.png);
+			border: solid 1px #d1d8df;
+			border-radius: 4px;
+			padding: 1px 3px;
+			cursor: pointer;
+		}
+		#logos > div .img { size: 54px *; horizontal-align: middle; }
+		#logos > div:hover { width: *; }
+		#logos > div:hover .text { visibility: visible; }
+		#logos img { display: block; margin: * 0; width: 50px; }
+		#logos .text
+		{
+			visibility: none;
+			width: *;
+			margin-left: 10px;
+			font-size: 12px;
+		}
+		#logos h5
+		{
+			display: block;
+			margin: 3px 0;
+			margin-bottom: 1px;
+			font-size: inherit;
+			color: #656cd0;
+		}
+	</style>
+</head>
+	
+<body>
+	<div #area-main>
+		<div style="width: 380px">
+			<div #section-actions>
+				<widget #btn-open-file><i .icon-folder-open />Open file</widget>
+				<widget #btn-configurations><i .icon-params />Configurations</widget>
+			</div>
+
+			<section #section-rfl>
+				<div .title>Recently open files <i .ft.ft-cancel-circled-outline #rfl-clear-list title="Clear list" /></div>
+
+				<div #rfl>
+					<div class="entry dummy-entry">
+						<div .col.col-file><i .icon-doc-text /></div>
+						<div .col.col-name>
+							<span .name></span>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section #section-info>
+				<include src="inc_sysinfo.html" />
+			</section>
+		</div>
+
+		<div>
+			<section #section-welcome>
+				<header>
+					<h1>OMNI</h1>
+					<h2>Sciter's developer HTML inspector</h2>
+				</header>
+
+				<main>
+					<div .s1>
+						<p>Use this tool to quickly preview your Sciter HTML.</p>
+						<p>It's most suited for usage in conjunction with your favorite IDE/text-editor where you want to assign a keyboard shortcut to run Omni to preview the HTML file you are editing. Command line usage:</p>
+
+						<script type="text/tiscript">							if(Utils.IsOSX)
+								self#pre-cli.text = "open Omni.app [-t] [-r] filename";
+							else
+								self#pre-cli.text = "Omni.exe [-t] [-r] filename";
+						
+</script>
+						<pre #pre-cli />
+
+						<p>The <code>-t</code> flag makes it a topmost window. The <code>-r</code> turns ON auto-refresh.</p>
+						<p>In Visual Studio, go to 'Tools/Edit Custom Tools..' and add the following as Command:</p>
+
+						<script type="text/tiscript">							self#pre-cmd1.text = view.Host_AppExePath();
+						
+
+        
+        </script>
+						<pre #pre-cmd1 />
+
+						<p>And for arguments:</p>
+						<pre>-t -r "${FilePath}"</pre>
+						
+						<p>Alternatively just drag'n'drop a HTML file inside this window.</p>
+					</div>
+
+					<div .s2>
+						<p>For questions, feel free to <a href="mailto:ramon@misoftware.com.br">e-mail us</a>.</p>
+					</div>
+				</main>
+			</section>
+
+			<section #section-essentials>
+				<h2>Essential Sciter development tools</h2>
+
+				<div #logos>
+					<div href="http://misoftware.com.br/Home/Post/IconBundler">
+						<div .img><img src="../img/logos/iconbundler.png" /></div>
+						<div .text>
+							<h5>IconBundler</h5>
+							A handy desktop tool for Windows and macOSX to help you work with <b>icons</b> in Sciter apps.
+						</div>
+					</div>
+					<div href="http://misoftware.com.br/OmniCode">
+						<div .img><img src="../img/logos/omnicode.png" style="width: 48px" /></div>
+						<div .text>
+							<h5>OmniCode</h5>
+							Full-featured <b>TIScript</b> and <b>CSS</b> editor for Visual Studio for writing HTML-based code for Sciter technology
+						</div>
+					</div>
+					<div href="http://misoftware.com.br/Home/Post/TheLibrary">
+						<div .img><img src="../img/logos/thelibrary.png" style="width: 50px" /></div>
+						<div .text>
+							<h5>The Library</h5>
+							A free desktop app with all Sciter <b>documentation</b> and <b>samples</b> in a single place (like Sciter's SDK documentation)
+						</div>
+					</div>
+					<div href="http://misoftware.com.br/Home/Post/OmniView">
+						<div .img><img src="../img/logos/omniview.png" style="width: 48px" /></div>
+						<div .text>
+							<h5>OmniView</h5>
+							An open-source Visual Studio extension that provides a Sciter <b>previewer</b> to the HTML editor
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+
+	<div #hr style="height: 70px">
+		<script type="text/tiscript">
+			view.on("size", function() {
+				var (w,h) = this.box(#dimension);
+				if(h < 780)
+					self#hr.style#height = Integer.max(0, h - 710);
+				else
+					self#hr.style#height = undefined;
+				//self.attributes["size"] = w < 500 ? "narrow" : "wide";
+			});
+		</script>
+	</div>
+
+	<include src="inc_footfx.html" />
+</body>
+</html>

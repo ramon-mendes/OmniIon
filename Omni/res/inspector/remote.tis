@@ -1,0 +1,4 @@
+/*DataSocket.listen(function(connectionSocket) {
+	trace("WTF");
+	return true;
+}, 0xDEB0);*/

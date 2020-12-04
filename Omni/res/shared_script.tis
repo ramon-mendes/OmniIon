@@ -1,0 +1,66 @@
+﻿function IsSDKValid()
+{
+	return Settings.ns_data.config.sdkpath && System.scanFiles(Settings.ns_data.config.sdkpath + "/doc/main.htm")!=0;
+}
+
+function OmniConfigSDK()
+{
+	if(!IsSDKValid())
+	{
+		view.msgbox(#information, "Configure the SDK path in order to view this page.", "Omni");
+		view.dialog(self.url("config.html"));
+		return IsSDKValid();
+	}
+	return true;
+}
+
+function CheckSDK()
+{
+	if(!IsSDKValid())
+	{
+		Settings.ns_data.config.sdkpath = undefined;
+		Settings.StoreWork();
+		view.msgbox(#alert, "The chosen directory does not contains a valid Sciter SDK content.");
+		return false;
+	}
+	return true;
+}
+
+function SelectSDK()
+{
+	var res = view.selectFolder();
+	if(res)
+	{
+		res = URL.toPath(res);
+
+		Settings.ns_data.config.sdkpath = res;
+		if(CheckSDK())
+		{
+			Settings.StoreWork();
+			return res;
+		}
+		return "";
+	}
+}
+
+function InstallPoptip()
+{
+	var el_tt = self.$(#poptip);
+	assert(el_tt);
+	Utils.installLinkHandler(el_tt);
+
+	var el = el_tt.prior;
+	var poptip;
+
+	var fh = function() {
+		if(!poptip)
+			poptip = this.popup(el_tt, Utils.popupAttachment(3, 9));
+		else {
+			el_tt.closePopup();
+			poptip = false;
+		}
+	};
+
+	el.on("mouseup", fh);
+	el_tt.on("mouseup", fh);
+}

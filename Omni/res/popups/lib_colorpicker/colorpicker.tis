@@ -1,0 +1,163 @@
+﻿// http://labs.abeautifulsite.net/jquery-minicolors/
+class Colorpicker : Element
+{
+	const SIZE = 150;
+	
+	// overridable
+	function onLoadColor() {}
+	function onUpdateColor(clr, h, s, l) {}
+	
+	function attached()
+	{
+		var el_clrpicker = this;
+		el_clrpicker.grid_pos_x = 0;
+		el_clrpicker.grid_pos_y = 0;
+		el_clrpicker.slider_pos = 0;
+		el_clrpicker.alpha_pos = 150;
+
+		this.post(function() {
+			var clr = Color.hsl(180deg, .68, .7);
+			this.loadColor(clr);
+		})
+		
+		// sub-parts attach
+		function attachGrid()
+		{
+			var in_grid_drag;
+			this.onMouse = function(evt)
+			{
+				switch(evt.type)
+				{
+				case Event.MOUSE_DOWN:
+					el_clrpicker.grid_pos_x = this[0].style#left = evt.x.limit(0, SIZE);
+					el_clrpicker.grid_pos_y = this[0].style#top = evt.y.limit(0, SIZE);
+					el_clrpicker.readColor();
+
+					in_grid_drag = true;
+					this.capture(#strict);
+					el_clrpicker.readColor();
+					break;
+
+				case Event.MOUSE_MOVE:
+					if(in_grid_drag)
+					{
+						el_clrpicker.grid_pos_x = this[0].style#left = evt.x.limit(0, SIZE);
+						el_clrpicker.grid_pos_y = this[0].style#top = evt.y.limit(0, SIZE);
+						el_clrpicker.readColor();
+					}
+					break;
+
+				case Event.MOUSE_LEAVE:
+				case Event.MOUSE_UP:
+					if(in_grid_drag)
+					{
+						this.capture(false);
+						in_grid_drag = false;
+						el_clrpicker.readColor();
+					}
+					break;
+				}
+			}
+		}
+
+		function attachSlider()
+		{
+			var in_slider_drag;
+			this.onMouse = function(evt)
+			{
+				switch(evt.type)
+				{
+				case Event.MOUSE_DOWN:
+					if(this.@.hasClass("alpha"))
+						el_clrpicker.alpha_pos = this[0].style#top = evt.y.limit(0, SIZE);
+					else
+						el_clrpicker.slider_pos = this[0].style#top = evt.y.limit(0, SIZE);
+					el_clrpicker.readColor();
+
+					in_slider_drag = true;
+					this.capture(#strict);
+					break;
+
+				case Event.MOUSE_MOVE:
+					if(in_slider_drag)
+					{
+						if(this.@.hasClass("alpha"))
+							el_clrpicker.alpha_pos = this[0].style#top = evt.y.limit(0, SIZE);
+						else
+							el_clrpicker.slider_pos = this[0].style#top = evt.y.limit(0, SIZE);
+						el_clrpicker.readColor();
+					}
+					break;
+
+				case Event.MOUSE_LEAVE:
+				case Event.MOUSE_UP:
+					if(in_slider_drag)
+					{
+						this.capture(false);
+						in_slider_drag = false;
+						el_clrpicker.readColor();
+					}
+					break;
+				}
+			}
+		}
+		
+		attachGrid.call( this.$(.grid) );
+		attachSlider.call( this.$(.slider) );
+
+		if(this.no_alpha || this.@#no_alpha !== undefined)
+			this.$(.slider.alpha).remove();
+		else
+			attachSlider.call( this.$(.slider.alpha) );
+
+		// mouse wheel handling
+		el_clrpicker.onMouse = function(evt) {
+			if(evt.type==(Event.MOUSE_WHEEL))
+			{
+				if( evt.target.$is(.slider) || evt.target.$is(.slider .picker) )
+				{
+					var target = evt.target.$p(.slider);
+					if(target.@.hasClass("alpha"))
+						el_clrpicker.alpha_pos = target[0].style#top = (target[0].style#top.toInteger() + evt.wheelDelta*-1).limit(0, SIZE);
+					else
+						el_clrpicker.slider_pos = target[0].style#top = (target[0].style#top.toInteger() + evt.wheelDelta*-1).limit(0, SIZE);
+					el_clrpicker.readColor();
+				}
+			}
+		}
+	}
+
+	function loadColor(clr)
+	{
+		var el_clrpicker = this;
+		var (h,s,l) = clr.toHSL();
+
+		el_clrpicker.grid_pos_x = (s*SIZE + 0.5).toInteger();
+		el_clrpicker.grid_pos_y = (l*SIZE + 0.5).toInteger();
+		el_clrpicker.$(.grid .picker).style#left = el_clrpicker.grid_pos_x;
+		el_clrpicker.$(.grid .picker).style#top = el_clrpicker.grid_pos_y;
+
+		el_clrpicker.slider_pos = ((h/360.0) * SIZE + 0.5).toInteger();
+		el_clrpicker.$(.slider.hue .picker).style#top = el_clrpicker.slider_pos;
+		if(!this.no_alpha)
+		{
+			el_clrpicker.alpha_pos = SIZE * clr.opacity;
+			el_clrpicker.$(.slider.alpha .picker).style#top = el_clrpicker.alpha_pos;
+		}
+
+		el_clrpicker.readColor();
+	}
+
+	function readColor()
+	{
+		var hue = 1 - this.slider_pos.toFloat() / SIZE.toFloat();
+		this.$(.grid).style#background-color = Color.hsl(deg(hue*360), 1.0, 1.0);
+
+		var saturation = this.grid_pos_x / SIZE.toFloat();
+		var brightness = 1 - this.grid_pos_y / SIZE.toFloat();
+		var alpha = this.alpha_pos.toFloat() / SIZE.toFloat();
+
+		var newclr = Color.hsl(deg(hue*360), saturation, brightness, alpha);
+		this.onUpdateColor(newclr, deg(hue*360), saturation, brightness);
+	}
+}

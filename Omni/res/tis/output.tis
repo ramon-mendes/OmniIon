@@ -1,0 +1,194 @@
+class OutputBehavior : Element
+{
+	const MAX_ITEMS = 100;
+	const SUBSYSTEM = ["dom", "csss", "css", "tis", "console"];
+	const SEVERITY = ["info", "warning", "error", "none"];
+	//const SEVERITY_ICON = [".ft.ft-info", ".ft.ft-attention-1", ".ft.ft-cancel-circled-2", ""];
+
+	function attached()
+	{
+		var el_this = this;
+
+		this.on("click", "#console-menu li", function(evt) {
+			switch(evt.target.@#command)
+			{
+			case "clear":
+				this.post(::el_this.Clear());
+				break;
+
+			case "copy":
+				{
+					var opt = el_this.$(li:current);
+					if(opt)
+						view.clipboard(#put, opt.text);
+				}
+				break;
+			}
+			return true;
+		});
+
+		this.on("dblclick", "li", function(evt) {
+			// TEST ME
+			if(evt.target.text)
+				view.clipboard(#put, evt.target.text);
+		});
+
+		this.on("click", "span.data", function(evt) {
+			count();
+			console.show(this.val);
+			return true;
+		});
+
+		this.on("click", "span.iinspect", function(evt) {
+			count();
+			console.dom(this.val);
+			return true;
+		});
+	}
+
+	function crackText(text)
+	{
+		const RE_FILE_LINE = /[(](file:[^()]+[(](\d+)[)])[)]/g;
+
+		text = text.replace("\t", "  ");//.htmlEscape();
+		/*text = text.replace(RE_FILE_LINE, function(str,g,n) {
+			return "(<a href='" + (g /~ "(") + "' line=" + n + " >" + (g %~ "/") + "</a>)";
+		});*/
+		return text;
+	}
+
+	function valueString(val)
+	{
+		var composite;
+		switch(typeof val)
+		{
+		case #Element:	composite = "Element " + val.tagname(); break;
+		case #Node:
+			assert(val.isElement==false);
+			composite = "Node " + (val.isText ? "text" : "comment");
+			break;
+		case #object:	if(val!=null) composite = "Object"; break;
+		case #array:	composite = "Array"; break;
+		case #Event:	composite = String.printf("%s", val); break;
+		case #Image:	composite = String.printf("Image (%dpx, %dpx)", val.width, val.height); break;
+		}
+
+		var el_span;
+		if(composite)
+		{
+			if(typeof val==#Element)
+			{
+				el_span = Element.create{ span, 
+					class: "ielement",
+					[
+						{ span, class: "data", [composite] },
+						{ span, class: "iinspect", [{i}] },
+					]};
+				el_span[0].val = val;
+				el_span[1].val = val;
+			} else {
+				el_span = Element.create{ span, class: "data", [composite] };
+				el_span.val = val;
+			}
+		} else {
+			var txt;
+			switch(typeof val)
+			{
+				case #date:		txt = "[Date " + val.toISOString() + "]"; break;
+				default:		txt = crackText(String.$({val})); break;
+			}
+
+			//if(typeof val == #string)
+			//	txt = "\"" + txt + "\"";
+			el_span = Element.create{ span, class: "val", [txt] };
+		}
+		return el_span;
+	}
+
+	function renderRootValue(el_opt, val)
+	{
+		el_opt.append(valueString(val));
+
+		if(typeof val==#array)
+		{
+			el_opt.append(" [");
+			for(var (i,v) in val)
+			{
+				el_opt.append(" ");
+				el_opt.append(valueString(v));
+				el_opt.append(i != val.length-1 ? "," : " ");
+			}
+			el_opt.append("]");
+		}
+		else if(typeof val==#object && val!=null)
+		{
+			el_opt.append(" {");
+
+			var keys = [];
+			for(var(k,v) in val)
+				keys.push(k);
+			keys = keys.sort();
+
+			for(var(i,k) in keys)
+			{
+				el_opt.append(" " + k + ": ");
+				el_opt.append(valueString(val[k]));
+				el_opt.append(i != keys.length-1 ? "," : " ");
+			}
+
+			el_opt.append("}");
+		}
+		this.append(el_opt);
+	}
+
+
+	function Clear()
+	{
+		//for(var el in this.$$(*))
+		//	el.remove();
+		this.clear();// is causing an AV
+
+		if(this.is_main_console)
+			this.ResetCounters();
+	}
+
+	function InsertLines(lines)
+	{
+		var sx = this.scroll(#left);
+		var sy = this.scroll(#bottom);
+
+		for(var item in lines)
+		{
+			if(this.length >= MAX_ITEMS)
+				this.first.remove();
+
+			var subs = item[0];
+			var sev = item[1];
+			var value = item[2];
+
+			this.$append(<li class="{SEVERITY[sev]}" />);
+			this.renderRootValue(this.last, value);
+		}
+
+		//this.scrollTo(sx, 10000, false /*smooth*/);
+		this.post(::this.scrollTo(sx, 10000));
+	}
+
+	function InsertValues(arr_vals)// console SUBSYSTEM!
+	{
+		var sx = this.scroll(#left);
+		var sy = this.scroll(#bottom);
+
+		if(this.length >= MAX_ITEMS)
+			this.first.remove();
+
+		this.append(String.printf("<li class='%s %s' />", SUBSYSTEM[4], SEVERITY[0]));
+		for(var val in arr_vals)
+		{
+			this.renderRootValue(this.last, val);
+			this.last.append(" ");
+		}
+
+		this.scrollTo(sx, 10000, false /*smooth*/);
+	}
+}

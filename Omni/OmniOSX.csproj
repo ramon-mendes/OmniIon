@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ProjectGuid>{77C8C5E7-4AB3-49FF-B8CD-4EE0B850576A}</ProjectGuid>
+    <ProjectTypeGuids>{A3F8F2AB-B479-4A4A-A458-A89E7DC349F1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Omni</RootNamespace>
+    <AssemblyName>Omni</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>
+    <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;__UNIFIED__;OSX</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <CodeSigningKey>Mac Developer</CodeSigningKey>
+    <CreatePackage>false</CreatePackage>
+    <EnablePackageSigning>false</EnablePackageSigning>
+    <IncludeMonoRuntime>false</IncludeMonoRuntime>
+    <UseSGen>true</UseSGen>
+    <UseRefCounting>true</UseRefCounting>
+    <PlatformTarget>x64</PlatformTarget>
+    <AOTMode>None</AOTMode>
+    <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <DebugType></DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <EnableCodeSigning>true</EnableCodeSigning>
+    <CreatePackage>true</CreatePackage>
+    <EnablePackageSigning>false</EnablePackageSigning>
+    <IncludeMonoRuntime>true</IncludeMonoRuntime>
+    <UseSGen>true</UseSGen>
+    <UseRefCounting>true</UseRefCounting>
+    <LinkMode>SdkOnly</LinkMode>
+    <PlatformTarget>x64</PlatformTarget>
+    <DefineConstants>__UNIFIED__;OSX</DefineConstants>
+    <CustomCommands>
+      <CustomCommands>
+        <Command>
+          <type>BeforeBuild</type>
+          <command>sh scripts/packOSX.sh</command>
+        </Command>
+      </CustomCommands>
+    </CustomCommands>
+    <AOTMode>None</AOTMode>
+    <CodeSigningKey>Developer ID Application</CodeSigningKey>
+    <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Xamarin.Mac" />
+    <Reference Include="SciterSharpOSX">
+      <HintPath>..\packages\SciterSharpOSX.2.0.67\lib\xamarinmac20\SciterSharpOSX.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\16.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\16%402.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\32.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\32%402.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\128.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\128%402.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\256.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\256%402.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\512.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\512%402.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Info.plist" />
+    <None Include="res\config.html" />
+    <None Include="res\index.html" />
+    <None Include="res\shared_script.tis" />
+    <None Include="res\unittest.html" />
+    <None Include="res\home\home.html" />
+    <None Include="res\home\inc_footfx.html" />
+    <None Include="res\home\inc_sysinfo.html" />
+    <None Include="res\home\rfl.tis" />
+    <None Include="res\img\blade_loadingprogress.gif" />
+    <None Include="res\img\under-construction.gif" />
+    <None Include="res\img\wip_bg.gif" />
+    <None Include="res\inspector\console.tis" />
+    <None Include="res\inspector\inspector.css" />
+    <None Include="res\inspector\inspector.html" />
+    <None Include="res\inspector\inspector.tis" />
+    <None Include="res\inspector\network.tis" />
+    <None Include="res\inspector\remote.tis" />
+    <None Include="res\inspector\unittest.html" />
+    <None Include="res\lib_menu\menu-chrome.css" />
+    <None Include="res\lib_menu\toggler-knob.svg" />
+    <None Include="res\lib_menu\toggler2.css" />
+    <None Include="res\lib_menu\unittes.html" />
+    <None Include="res\lib_menu\unittest.html" />
+    <None Include="res\lib_settings\settings.tis" />
+    <None Include="res\lib_settings\unittest.html" />
+    <None Include="res\popups\data_handler.tis" />
+    <None Include="res\popups\data_popup.css" />
+    <None Include="res\popups\popup_colorpicker.html" />
+    <None Include="res\popups\popup_colortouch.html" />
+    <None Include="res\popups\popup_common.css" />
+    <None Include="res\popups\popup_common.tis" />
+    <None Include="res\popups\popup_console.html" />
+    <None Include="res\popups\popup_data.html" />
+    <None Include="res\popups\popup_data_image.html" />
+    <None Include="res\popups\popup_fontpicker.html" />
+    <None Include="res\popups\popup_my.html" />
+    <None Include="res\popups\popup_snippet.html" />
+    <None Include="res\popups\popup_texturepicker.html" />
+    <None Include="res\popups\unittest.html" />
+    <None Include="res\popups\lib_colorpicker\colorpicker.html" />
+    <None Include="res\popups\lib_colorpicker\colorpicker.tis" />
+    <None Include="res\popups\lib_colortouch\common.css" />
+    <None Include="res\popups\lib_colortouch\common.tis" />
+    <None Include="res\popups\lib_colortouch\frm_cbg.html" />
+    <None Include="res\popups\lib_colortouch\frm_colorize.html" />
+    <None Include="res\popups\lib_colortouch\frm_hue-saturation.html" />
+    <None Include="res\popups\lib_colortouch\frm_hue2.html" />
+    <None Include="res\popups\lib_colortouch\sliderpicker.tis" />
+    <None Include="res\popups\lib_colortouch\unittest.html" />
+    <None Include="res\popups\lib_texturepicker\unittest.html" />
+    <None Include="res\style\global.css" />
+    <None Include="res\style\index.css" />
+    <None Include="res\style\fontello\omni-font.css" />
+    <None Include="res\style\fontello\omni-svg.css" />
+    <None Include="res\style\fontello\omni.ttf" />
+    <None Include="res\style\fonts\Shumi-font.css" />
+    <None Include="res\style\fonts\Shumi.otf" />
+    <None Include="res\tis\keyboard.tis" />
+    <None Include="res\tis\omni.tis" />
+    <None Include="res\tis\output.tis" />
+    <None Include="res\tis\state.tis" />
+    <None Include="res\tis\toolbar.tis" />
+    <None Include="scripts\packOSX.sh" />
+    <None Include="scripts\packWindows.bat" />
+    <None Include="scripts\packfolder" />
+    <None Include="scripts\packfolder.exe" />
+    <None Include="res\tis\consts.tis" />
+    <None Include="packages.OmniOSX.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Src\App.cs" />
+    <Compile Include="Src\AppUnittest.cs" />
+    <Compile Include="Src\Consts.cs" />
+    <Compile Include="Src\ProgramOSX.cs" />
+    <Compile Include="Src\ProgramWL.cs" />
+    <Compile Include="Src\State.cs" />
+    <Compile Include="Src\Hosting\BaseHost.cs" />
+    <Compile Include="Src\Hosting\FrameEvh.cs" />
+    <Compile Include="Src\Hosting\Host.cs" />
+    <Compile Include="Src\Hosting\HostEvh.cs" />
+    <Compile Include="Src\Hosting\InternalDbg.cs" />
+    <Compile Include="Src\Hosting\Window.cs" />
+    <Compile Include="Src\UI\DOMTree.cs" />
+    <Compile Include="Src\UI\Inspecting.cs" />
+    <Compile Include="Src\UI\WidgetTreePath.cs" />
+    <Compile Include="Src\Utilities\Mono.cs" />
+    <Compile Include="Src\Utilities\Utils.cs" />
+    <Compile Include="Src\Utilities\UtilsExtension.cs" />
+    <Compile Include="Src\ArchiveResource.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="res\img\ajax_loader.png" />
+    <BundleResource Include="res\img\alpha_grid.png" />
+    <BundleResource Include="res\img\arrow.png" />
+    <BundleResource Include="res\img\arrow_closed.png" />
+    <BundleResource Include="res\img\arrow_open.png" />
+    <BundleResource Include="res\img\back.png" />
+    <BundleResource Include="res\img\bar_alpha.png" />
+    <BundleResource Include="res\img\bar_hue.png" />
+    <BundleResource Include="res\img\bar_saturation.png" />
+    <BundleResource Include="res\img\bg_blue.png" />
+    <BundleResource Include="res\img\close2.png" />
+    <BundleResource Include="res\img\elmenu_btn.png" />
+    <BundleResource Include="res\img\elmenu_btn_hover.png" />
+    <BundleResource Include="res\img\forward.png" />
+    <BundleResource Include="res\img\grain.png" />
+    <BundleResource Include="res\img\grid.png" />
+    <BundleResource Include="res\img\grid2.png" />
+    <BundleResource Include="res\img\hud_resize_corner.png" />
+    <BundleResource Include="res\img\icon-inspector.png" />
+    <BundleResource Include="res\img\logo_shadow.png" />
+    <BundleResource Include="res\img\logo_styled.png" />
+    <BundleResource Include="res\img\new.png" />
+    <BundleResource Include="res\img\noise.png" />
+    <BundleResource Include="res\img\picker.png" />
+    <BundleResource Include="res\img\shadow.png" />
+    <BundleResource Include="res\img\swatch.png" />
+    <BundleResource Include="res\img\waves-bg.png" />
+    <BundleResource Include="res\img\logos\iconbundler.png" />
+    <BundleResource Include="res\img\logos\logo_mi.png" />
+    <BundleResource Include="res\img\logos\omnicode.png" />
+    <BundleResource Include="res\img\logos\omniview.png" />
+    <BundleResource Include="res\img\logos\thelibrary.png" />
+    <BundleResource Include="res\popups\lib_colortouch\bg2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <NativeReference Include="libsciter-osx-64.dylib">
+      <Kind>Dynamic</Kind>
+      <SmartLink>False</SmartLink>
+    </NativeReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
+</Project>

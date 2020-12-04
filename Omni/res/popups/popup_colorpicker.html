@@ -1,0 +1,115 @@
+﻿<!-- OmniView:on -->
+<html nomove=true>
+<script type="text/tiscript">
+	include "popup_common.tis";
+	include "lib_colorpicker/colorpicker.tis";
+
+	var params = view.parameters;// || { el: $(body), prop: #background };
+	var el_target = params.el;
+	var prop = params.prop;
+	var last_color;
+
+	self.post(function() {
+		var el_colorpicker = self#main.$(frame)[0].$(.color-picker);
+		el_colorpicker.onLoadColor = function() {
+			last_color = el_target.style[prop];
+			if(typeof last_color == #Color)
+				return last_color;
+		}
+		
+		el_colorpicker.onUpdateColor = function(clr, h, s, l) {
+			$(dd.alpha).text = String.printf("%.2f", clr.opacity);
+			
+			if(clr.opacity==1)
+			{
+				$(dd.hsl).text = String.printf("hsl(%i,%i%%,%i%%)", h.toInteger(), s*100, l*100);
+				$(dd.rgb).text = String.printf("rgb(%i,%i,%i)", clr.r, clr.g, clr.b);
+			} else {
+				$(dd.hsl).text = String.printf("hsla(%i,%i%%,%i%%,%.2f)", h.toInteger(), s*100, l*100, clr.opacity);
+				$(dd.rgb).text = String.printf("rgba(%i,%i,%i,%.2f)", clr.r, clr.g, clr.b, clr.opacity);
+			}
+				
+			$(dd.hex).text = clr.toString(#RGB);
+
+			// color box
+			$(.color-box .solid).style#background-color = clr;//Color.rgba(clr.r, clr.g, clr.b, 255);
+			
+			// update target
+			el_target.style[prop] = clr;
+			last_color = clr;
+		}
+	});
+
+	$(.color-box).onClick = function() {
+		el_target.style[prop] = last_color;
+	};
+
+	self.on("click", "dd", function() {
+		view.clipboard(#put, this.text);
+		return true;
+	});
+
+	$(header).text = "#" + prop;
+</script>
+
+<style>
+	@import url(../style/global_base.css);
+	@import url(popup_common.css);
+
+	html
+	{
+		size: 400px 195px;
+		overflow: hidden;
+	}
+
+	#main { flow: horizontal; padding: 8px; }
+
+	.col-info
+	{
+		width: *;
+		margin-left: 10px;
+	}
+
+	.color-box
+	{
+		size: * 26px;
+		border-radius: 3px;
+		background-image: url(../img/alpha_grid.png);
+		overflow: hidden;
+		cursor: pointer;
+	}
+	.color-box .solid { size: *; }
+
+	dl { flow: row(dt,dd); margin-right: 1px; border-spacing: 3px; vertical-align: middle; }
+	dl dd { width: *; padding: 2px 3px; background: #dbdbdb; flow: text; white-space: nowrap; cursor: pointer; }
+</style>
+
+<body>
+	<div #area-header title="Press ESC to close">
+		<img src="../img/hud_resize_corner.png" />
+		<header />
+		<close />
+	</div>
+
+	<div #main>
+		<frame src="lib_colorpicker/colorpicker.html" />
+
+		<div .col-info>
+			<div .color-box>
+				<div .solid />
+			</div>
+
+			<dl>
+				<dt>Alpha:</dt>
+				<dd .alpha></dd>
+				<dt>HSL:</dt>
+				<dd .hsl style="font-size: 12px"></dd>
+				<dt>RGB:</dt>
+				<dd .rgb style="font-size: 12px"></dd>
+				<dt>Hex:</dt>
+				<dd .hex></dd>
+			</dl>
+		</div>
+	</div>
+</body>
+</html>

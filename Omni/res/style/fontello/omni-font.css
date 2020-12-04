@@ -1,0 +1,39 @@
+@font-face
+{
+	font-family: omni-116813;
+	font-style: normal;
+	src: url(omni.ttf);
+}
+
+i[class*=icon-]
+{
+	display: inline-block;
+	font-family: omni-116813;
+	font-size: 1.20em;
+	font-style: normal;
+}
+i.icon-arrows-cw { content: '\e800'; }
+i.icon-picture { content: '\e801'; }
+i.icon-cancel { content: '\e802'; }
+i.icon-cancel-circled2 { content: '\e803'; }
+i.icon-cog { content: '\e804'; }
+i.icon-cog-alt { content: '\e805'; }
+i.icon-folder-open { content: '\e806'; }
+i.icon-params { content: '\e807'; }
+i.icon-doc-text { content: '\e808'; }
+i.icon-check { content: '\e809'; }
+i.icon-target { content: '\e80a'; }
+i.icon-monitor { content: '\e80b'; }
+i.icon-chart-line { content: '\e80c'; }
+i.icon-article-alt { content: '\e80d'; }
+i.icon-attention { content: '\e80e'; }
+i.icon-cancel-circled { content: '\e80f'; }
+i.icon-plus { content: '\e810'; }
+i.icon-plug-1 { content: '\e813'; }
+i.icon-check-empty { content: '\f096'; }
+i.icon-list-bullet { content: '\f0ca'; }
+i.icon-magic { content: '\f0d0'; }
+i.icon-angle-double-right { content: '\f101'; }
+i.icon-terminal { content: '\f120'; }
+i.icon-info { content: '\f129'; }
+i.icon-bug { content: '\f188'; }

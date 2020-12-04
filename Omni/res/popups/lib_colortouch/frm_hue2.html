@@ -1,0 +1,164 @@
+﻿<script type="text/tiscript">
+	// HUE
+	class HueBar : Sliderpicker
+	{
+		function onUpdatePos(p)
+		{
+			var hue = 360*p;
+			self#hue.$(input).value = hue;
+
+			transforms.hue = "hue(" + hue + ")";
+			UpdateTransforms();
+		}
+	}
+	self#hue.f_defaults = ::self#hue.$(.bar).onUpdatePos(0);
+
+	// OPACITY
+	class OpacityBar : Sliderpicker
+	{
+		function onUpdatePos(p)
+		{
+			var alpha = String.printf("%.2f", 1-p);
+			self#opacity.$(input).value = alpha;
+
+			transforms.opacity = "opacity(" + alpha + ")";
+			UpdateTransforms();
+		}
+	}
+	self#opacity.f_defaults = ::self#opacity.$(.bar).onUpdatePos(0);
+
+	// COLORIZE
+	class ColorizeColorPicker : Colorpicker
+	{
+		function onUpdateColor(clr, h, s, l)
+		{
+			if(this.state.disabled)
+				return;
+			
+			var rgb = clr.toString(#RGB).toUpperCase();
+			self#colorize.$(input).text = rgb;
+			
+			transforms.colorize = "colorize(" + rgb + ")";
+			UpdateTransforms();
+		}
+	}
+
+	// CONTRAST-BRIGHTNESS-GAMMA
+	$(#cbg #c).onValueChanged = function() {
+		UpdateTransforms();
+	};
+	$(#cbg #b).onValueChanged = function() {
+		UpdateTransforms();
+	};
+	$(#cbg #g).onValueChanged = function() {
+		UpdateTransforms();
+	};
+</script>
+
+<style>
+	section { margin-bottom: 3px; }
+	.header { background: silver; padding-left: 5px; }
+	.hflow { flow: horizontal; }
+
+	.color-picker { prototype: ColorizeColorPicker; }
+	.hue-slider { prototype: HueBar; }
+	.opacity-slider { prototype: OpacityBar; }
+
+	.area-inputs { padding: 4px; }
+	.area-inputs:disabled { display: none; }
+	.area-inputs [type=text] { width: 40px; margin-left: 5px; font-family: monospace; }
+	.area-inputs [type=text][readonly] { background: silver; }
+	.area-inputs [type=decimal] { width: 50px; }
+	.area-inputs #box-color { size: 30px 20px; margin: 0; background: red; border: solid 1px #abadb3; cursor: pointer; }
+</style>
+
+<style>
+	.bar
+	{
+		size: 150px 20px;
+		//padding: 1px;
+		border: solid 1px #abadb3;//#cccccc;
+		background: white no-repeat center;
+		cursor: w-resize;
+	}
+	.bar.hue { background-image: url(/img/bar_hue.png); }
+	.bar.opacity { background-image: url(/img/bar_alpha.png); }
+
+	.bar .picker
+	{
+		position: relative;
+		left: 0;
+		margin-left: 0px;
+		size: 2px *;
+		background: white;
+		border: 1px solid #000;
+	}
+</style>
+
+
+<section #hue>
+	<div .header>
+		<widget|checkbox>hue</widget>
+	</div>
+	
+	<div .area-inputs.hflow>
+		<input!integer min=0 max=360 step=1 style="margin-right: 5px" />
+		<div .bar.hue.hue-slider><div .picker /></div>
+	</div>
+</section>
+
+<section #colorize>
+	<div .header>
+		<widget!checkbox>colorize</widget>
+	</div>
+		
+	<div .area-inputs>
+		<div .hflow>
+			<div></div>
+			<input!text style="width: 80px" readonly />
+		</div>
+		<frame src="../lib_colorpicker/colorpicker.html" />
+	</div>
+</section>
+
+<section #cbg>
+	<div .header>
+		<widget !checkbox>contrast-brightness-gamma</widget>
+	</div>
+		
+	<div .area-inputs>
+		C
+		<input!decimal#c min=0 max=1 step=0.01 />
+		B
+		<input!decimal#b min=0 max=1 step=0.01 />
+		G
+		<input!decimal#g min=0 max=1 step=0.01 />
+	</div>
+</section>
+
+<section #opacity>
+	<div .header>
+		<widget!checkbox>opacity</widget>
+	</div>
+		
+	<div .area-inputs.hflow>
+		<input!decimal min=0 max=1 step=0.1 style="margin-right: 5px" />
+		<div .bar.opacity.opacity-slider><div .picker /></div>
+	</div>
+</section>
+
+<section #misc>
+	<div .header>
+		<widget!checkbox>Misc</widget>
+	</div>
+
+	<div .area-inputs.hflow>
+		<widget!checkbox #flip-x>flip-x</widget>
+		<widget!checkbox #flip-y>flip-y</widget>
+	</div>
+</section>
+
+<section>
+	<button .std-btn>Docs</button>
+	<button .std-btn>Copy CSS</button>
+</section>

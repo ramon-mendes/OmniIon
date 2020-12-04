@@ -1,0 +1,80 @@
+class SourceView : Behavior
+{
+	function attached()
+	{
+		this.on("~dblclick", "plaintext > text", function(evt) {
+			(this super).toggleBreakpoint(this);
+			return true;
+		});
+		this.on("~keydown", function(evt) {
+			if(evt.keyCode==Event.VK_F9)
+			{
+				var el_editor = (this super);
+				var textNodeWhereCaretIs = el_editor.selection.caret[0];
+				if(textNodeWhereCaretIs.parent==el_editor)
+					return true;
+				var elementWhereCaretIs = textNodeWhereCaretIs.parent;
+
+				el_editor.toggleBreakpoint(elementWhereCaretIs);
+				return true;
+			}
+		});
+
+		this.on("statechange", function(evt) {
+			this.selection.caret[0].parent.state.current = true;
+		});
+	}
+
+	function toggleBreakpoint(el_line)
+	{
+		var wasBreakpoint = el_line.attributes["breakpoint"];
+		
+		if(wasBreakpoint)
+		{
+			RemoveBreakpoint(el_line.index + 1);
+			//el_line.attributes["breakpoint"] = undefined;
+		} else {
+			AddBreakpoint(el_line.index + 1);
+			//el_line.attributes["breakpoint"] = true;
+		}
+	}
+
+	function loadBreakpoints(lines)
+	{
+		for(var el_line in this)
+			el_line.attributes["breakpoint"] = undefined;
+		for(var iline in lines)
+			this[iline-1].attributes["breakpoint"] = true;
+	}
+
+	function setStepLine(lineNo = undefined)
+	{
+		var el_line = this.$(text[step]);
+		if(el_line)
+			el_line.@#step = undefined;
+
+		if(lineNo)
+		{
+			var el_line = this[lineNo-1];
+			if(el_line)
+			{
+				el_line.@#step = true;
+				el_line.scrollToView(false, false);
+
+				this.selection.select([bookmark: el_line.firstNode, 0, false]);
+			}
+			this.state.focus = true;
+		}
+	}
+
+	function setHighlightLine(lineNo)
+	{
+		var el_line = this[lineNo-1];
+		el_line.@#highlighted = true;
+		el_line.timer(800, ::el_line.@#highlighted = undefined);
+		el_line.scrollToView(false, false);
+
+		this.selection.select([bookmark: el_line.firstNode, 0, false]);
+		this.state.focus = true;
+	}
+}

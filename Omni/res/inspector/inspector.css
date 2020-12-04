@@ -1,0 +1,400 @@
+.elmenu
+{
+	flow: horizontal;
+	border-spacing: 1px;
+	height: 26px;
+
+	padding: 1px 2px;
+	background: rgba(53, 60, 69, 0.92);
+	border-radius: 3px;
+	opacity: 0.7;
+}
+.elmenu:hover, .elmenu:owns-popup { opacity: 1.0; }
+
+.elmenu button
+{
+	vertical-align: middle;
+	horizontal-align: center;
+	height: *;
+
+	background-image: url(../img/elmenu_btn.png);
+	background-repeat: expand;
+	background-position: 3 3 3 3;
+	color: #809292;
+}
+.elmenu button:hover { background-image: url(../img/elmenu_btn_hover.png); color: white; }
+
+#inspector-wrap
+{
+	size: *;
+	flow: vertical;
+}
+
+#topbar
+{
+	height: 28px;
+	flow: horizontal;
+	background: #ebeced;
+	border-top: solid #aaaaaa 1px;
+	border-bottom: solid #aaaaaa 1px;
+	vertical-align: middle;
+}
+#topbar .btn
+{
+	display: block;
+	flow: horizontal;
+	vertical-align: middle;
+	horizontal-align: center;
+	height: *;
+	width: 100px;
+	padding: 0 25px;
+	border-right: solid 1px #aaaaaa;
+
+	text-align: center;
+	font-size: 12px;
+	white-space: none;
+	text-wrap: none;
+}
+#topbar .btn:hover { background: #dedfe0; }
+#topbar .btn:active { background: #d1d2d2; }
+#topbar .btn:current
+{
+	border: none;
+	border-top: solid 2px #d7f1ff;
+	padding-bottom: 2px;
+	margin-left: -1px;
+    background: linear-gradient(top, 0px 5px, #3583b9, #4c9ed9);
+	color: white;
+}
+#topbar .btn > i { margin-right: 4px; }
+#topbar .btn:current > i { color: white; }
+#topbar .stat-icon { display: inline-block; font-family: @FF_MONOSPACE; margin-left: 2px; }
+#topbar .stat-icon.warn { color: #fb7300; }
+#topbar .stat-icon.error { color: #ea1818; }
+#topbar .stat-icon i { font-size: 11px; margin-left: 0px; margin-top: 2px; }
+#topbar .stat-icon.warn i { margin-top: 3px; }
+@media os-vendor=="Apple"
+{
+	#topbar .stat-icon i { margin-bottom: 1px; }
+}
+#topbar .btn:current .stat-icon { color: white; }
+
+#topbar #btn-iclose { margin-left: *; margin-right: 6px; padding: 2px 4px; font-size: 10px; color: #726f70; }
+#topbar #btn-iclose:hover { background: #dedfe0; }
+#topbar #btn-iclose:active { background: #d1d2d2; }
+
+#tabs { size: *; background: white; }
+#tabs .tab { size: *; display: none; }
+#tabs .tab:current { display: block; }
+#tabs .tab.wip { flow: horizontal; vertical-align: middle; background-image: url(../img/wip_bg.gif); }
+
+#console-menu,
+#network-menu { min-width: 130px; }
+
+#tab-inspector { style-set: "TabInspector"; }
+@set TabInspector
+{
+	frameset splitter { width: 1px; background: #aaa; hit-margin: 0 0 0 3px; }
+
+	#treeing { flow: vertical; }
+	#tag-path
+	{
+		flow: horizontal;
+		height: 23px;
+		overflow: hidden;
+		padding: 0 10px;
+
+		border-top: solid 1px #aaaaaa;
+		background: #f0f1f2;
+
+		behavior: WidgetTreePath;
+	}
+
+	#tag-path #msg
+	{
+		margin: 3px 0 0 4px;
+		width: max-content;
+		padding: 1px 3px;
+
+		font-size: 11px;
+		color: #726f70;
+	}
+
+	#tag-path:has-children-of-type(li) #msg { visibility: none; }
+
+	#tag-path li
+	{
+		prototype: ArrowDrawBehavior;
+		height: *;
+		width: max-content;
+		
+		margin-right: -12px;
+		font-family: system;
+		color: #60193e;
+	}
+	#tag-path li:hover { color: black; }
+	#tag-path li:current { color: white; }
+	#tag-path text { padding: * 20px * 23px; }
+	//#tag-path #inner-path li:nth-child(1) { outline: solid 2px red; }
+	//#tag-path #inner-path li:nth-child(2) { outline: solid 2px blue; }
+
+
+	#dom-tree
+	{
+		prototype: DomTreeBehavior;
+		border: none;
+		background: white;
+		size: *;
+		font-family: @FF_MONOSPACE;
+	}
+	#dom-tree option { context-menu: selector(menu#tree-menu); }
+	#dom-tree text { margin-left: -3px; }
+	#dom-tree text.invisible span { color: silver; }
+	#dom-tree span.head { color:purple; }
+	#dom-tree span.tail { color:purple; }
+	#dom-tree span.attrn { color:maroon; }
+	#dom-tree span.attrv { color:navy; }
+	#dom-tree span.text { color:black; }
+
+	#dom-tree option:expanded > text > span.tail,
+	#dom-tree option:expanded > text > span.text { display: none; }
+	
+
+	#inspecting { flow: vertical; }
+	#inspecting-topbar { flow: horizontal; height: 23px; border-bottom: solid 1px #aaa; }
+	#inspecting-topbar .btn { size: *; min-width: max-content; padding: * 15px; font-size: 12px; text-align: center; color: #585959; }
+	#inspecting-topbar .btn:hover { background: #dddddd; }
+	#inspecting-topbar .btn:current { background: #4c9ed9; color: #f5f7fa; }
+
+	#inspecting-topbar .sep { margin: 3px 0; height: *; width: 1px; background: #aaa; margin-right: -1px; position: relative; }
+	#inspecting-topbar .sep.hide { visibility: none; }
+
+	#inspecting-tabs { flow: stack; size: *; font-size: 11px; }
+	#inspecting-tabs > section { display: none; }
+	#inspecting-tabs > section:current { display: block; size: *; }
+	//#inspecting-tabs > section.overflows { overflow-y: auto; overflow-x: hidden; }// BUGGED
+	#inspecting-tabs .overflow-wrap { size: *; overflow-y: auto; overflow-x: hidden; }
+
+	#itab-computed { font-family: @FF_MONOSPACE; behavior: sticky-scroll; }// TODO: add "behavior:sticky-scroll;" when is get fixed
+	#itab-computed header { flow: horizontal; vertical-align: middle; padding: 3px 4px; border: solid #a5a5a5 1px; border-left: none; border-right: none; background: #e5e5e5; color: #667380; font-family: monospace; }
+	#itab-computed header i { margin-left: *; padding: 2px 4px; }
+	#itab-computed header i:hover { background-color: rgba(0, 0, 0, 0.1); }
+	#itab-computed header i:active { background-color: rgba(0, 0, 0, 0.14); }
+	#itab-computed ul { list-style: none; padding: 0; margin: 5px 0; }
+	#itab-computed ul li { padding: 2px 5px; line-height: 18px; }
+	//#itab-computed ul li:nth-child(even) { background: #f7f7f7; }
+	#itab-computed dt { display: inline-block; color: #667380; min-width: 160px; width: *; }
+	#itab-computed dd { display: inline-block; color: #6e8900; min-width: 90px; width: *; behavior: htmlarea; cursor: text; }
+	#itab-computed ul#list-states * { color: black; }
+
+	#itab-rules { font-family: @FF_MONOSPACE; }
+	#itab-rules header
+	{
+		flow: horizontal;
+		padding: 3px;
+		background: #d7e4f2;
+		border-bottom: solid 1px #99b4d1;
+		font-family: system;
+		white-space: nowrap;
+	}
+	#itab-rules header .selector { font-weight: bold; }
+	#itab-rules header a { margin-left: *; cursor: default; }
+
+	#itab-rules li { padding: 2px 5px; line-height: 18px; }
+	#itab-rules dt { display: inline-block; color: #667380; min-width: 160px; width: *; }
+	#itab-rules dd { display: inline-block; min-width: 90px; width: *; behavior: htmlarea; cursor: text; }
+
+	#itab-box { background: #f7f7f7; flow: vertical; horizontal-align: center; }
+	#itab-box #box-ux { width: 270px; font-family: @FF_MONOSPACE; aspect: "CSSdetails.UBoxAspect" }
+	#itab-box code { display: inline-block; margin: 12px 0 5px 0; }
+	#itab-box .cssbox { flow: stack; margin: 25px; color: #3572af; }
+	#itab-box .cssbox#box-margin { background: #e3ca98; margin: 0; }
+	#itab-box .cssbox#box-border { background: #ffef83; }
+	#itab-box .cssbox#box-padding { background: #ade2ac; }
+	#itab-box .cssbox#box-content { background: #b3e5ff; padding: 5px; text-align: center; }
+	#itab-box .cssbox .mflow { size: *; flow: "1 1 1" "2 3 4" "5 5 5"; }
+	#itab-box .mflow div { vertical-align: middle; text-align: center; }
+	#itab-box .mflow .filler { size: *; }
+	#itab-box .mflow .vside { height: 25px; }
+	#itab-box .mflow .hside { width: 25px; }
+	#itab-box .mflow .hside.rotate { transform: rotate(-90deg); }
+	#itab-box dl { flow: row(dt,dd); text-wrap: none; }
+
+	//#itab-this { border: solid 10px red; }
+}
+
+.console-style { style-set: "TabConsole"; }
+@set TabConsole
+{
+	:root { size: *; flow: vertical; }
+
+	.category-bar
+	{
+		flow: horizontal;
+		height: 23px;
+		background: #f0f1f2;
+		border-bottom: solid 1px #aaaaaa;
+	}
+	.category-bar button
+	{
+		behavior: check;
+		flow: horizontal;
+		vertical-align: middle;
+		height: *;
+		margin: 2px;
+		line-height: 19px;
+		padding: 0 15px;
+		background: none;
+		font-size: 12px;
+		color: #22272b;
+	}
+	.category-bar button.clear { behavior: none; background: #e2e3e4; }
+
+	.category-bar button:hover { background: #dbdbdc; }
+	.category-bar button:checked { background: #cfe1ed; }
+	.category-bar button:checked:hover { background: #aed0e8; }
+	
+
+	.category-bar .bullet
+	{
+		size: 6px;
+		margin-right: 5px;
+		border-radius: 4px;
+		border: solid 1px;
+	}
+	.category-bar .bullet.black { background: linear-gradient(top, #444, #000); border-color: #777; }
+	.category-bar .bullet.blue { background: linear-gradient(top, #2DC3F3, #00B6F0); border-color: #1BA2CC; }
+	.category-bar .bullet.orange { background: linear-gradient(top, #FCB142, #FB9500); border-color: #E98A00; }
+	.category-bar .bullet.red { background: linear-gradient(top, #FF3030, #FF7D7D); border-color: #D12C2C; }
+	.category-bar .bullet.gray { background: linear-gradient(top, #B9B9B9, #AAA); border-color: #929292; }
+
+
+	.console-output
+	{
+		prototype: "OutputBehavior";
+		size: *;// 100% width here fucks the snippets button, but helps the <option> shrink BUG
+		padding: 0;
+		overflow: auto;
+
+		//behavior: sticky-scroll;// why? it is making the <option> shrink BUG
+		//behavior: htmlarea; making AVs
+
+		background: none;
+		border: none;
+		font-family: @FF_MONOSPACE;
+		font-size: 12px;
+	}
+
+	option { width: *; margin-left: 4px; padding: 3px; padding-left: 32px; border-left: solid 5px; position: relative; }
+	option { context-menu: selector(menu#console-menu); }
+	option > i { display: block; position: absolute; left: 11px; top: 4px; }
+	option:hover { background: #d4e7f4; }
+	option:current { background: #d4e7f4; color: black; }
+
+	option.info { border-color: #6d54d4; }
+	option.info i { color: #6969ec; }
+	option.warning { border-color: #fb9500; }
+	option.warning i { color: #fb9500; }
+	option.warning > i { font-size: 11px; }
+	option.error { border-color: #808080; }
+	option.error i { color: #aaaaaa; }
+	option.error { background: #fddddd; color: #cb0000; }
+	option.none { border-color: #808080; }
+	option.none i { color: #aaaaaa; }
+
+	option span.data { behavior: button; font-style: italic; color: #0a3860; }
+	option span.data:hover { text-decoration: underline; cursor: pointer; }
+	option span.ielement { display: inline-block; position: relative; padding-right: 16px; }
+	option span.iinspect
+	{
+		behavior: button;
+		position: absolute;
+		top: -1;
+		right: 0;
+		
+		display: block;
+		size: 16px;
+		background-image: url(../img/icon-inspector.png);
+		cursor: pointer;
+	}
+	option span.iinspect:hover { background-position: -18px 0; }
+	//option span.val { color: #a18650; }
+
+	.console-prompt
+	{
+		flow: horizontal;
+		vertical-align: middle;
+		height: 23px;
+		prototype: "PromptBehavior";
+		overflow-x: hidden;
+		border-top: 1px solid #aaa;
+	}
+	.console-prompt > i
+	{
+		position: absolute;
+		top: 3px;
+		left: 7px;
+		font-size: 17px;
+		color: #39ace6;
+	}
+	.console-prompt widget
+	{
+		width: *;
+		padding-top: 4px;
+		padding-left: 20px;
+		background: white;
+		font-family: @FF_MONOSPACE;
+		border: none;
+		//line-height: 15px;
+	}
+
+	.console-prompt button
+	{
+		size: 22px *;
+		padding: 0;
+		horizontal-align: center;
+		background: none;
+		border-left: solid 1px #aaa;
+		color: #39ace6;
+		font-size: 9px;
+	}
+	.console-prompt button:hover
+	{
+		background: #eed7a8;
+		cursor: pointer;
+	}
+}
+
+#tab-network { style-set: "TabNetwork"; }
+@set TabNetwork
+{
+	table { size: *; background: #f7f7f7; border-spacing: 0; padding: 0; font-size: 12px; overflow: hidden; }
+	table thead td { border-bottom: solid 1px #bbb; white-space: nowrap; }
+	table tr { context-menu: selector(menu#network-menu); }
+	table tr.loading { color: gray; }
+	table tr.error { color: red; }
+	table td:nth-child(1) { text-align: center; }
+	table td:nth-child(1) span { display: inline-block; width: 35px; text-align: left; white-space: nowrap; }
+	table td { padding: 3px 4px; border-right: solid 1px #dfdfdf; border-bottom: solid 1px #dfdfdf; border-collapse: collapse; }
+	table tbody { size: *; overflow-y: auto; overflow-x: hidden; }
+	table tbody tr:nth-child(2n+1) { background: #f0f0f0; }
+	table tbody tr:current { background: #4c9ed9; color: white; }
+
+	table > thead { behavior: column-resizer; }
+}
+
+#netpreview-img, #netpreview-txt
+{
+	size: 500px 420px;
+	background: white;
+	border-radius: 3px;
+	border: solid 2px silver;
+}
+#netpreview-img header, #netpreview-txt header
+{
+	padding: 2px 6px;
+	border-bottom: solid 1px silver;
+}
+#netpreview-img .area-img { size: *; flow: horizontal; horizontal-align: center; vertical-align: middle; }
+#netpreview-img .area-img img { display: block; max-width: 100%; }
+#netpreview-txt .area-txt { size: *; margin: 0; overflow: scroll-indicator; behavior: htmlarea; font-size: 12px !important; }

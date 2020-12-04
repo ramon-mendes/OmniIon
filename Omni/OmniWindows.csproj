@@ -1,0 +1,280 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <ProjectGuid>{FABEBB54-7E6E-4DCD-A4A3-D713EA38731B}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Omni</RootNamespace>
+    <AssemblyName>Omni</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WINDOWS,APP_OMNI</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;WINDOWS,APP_OMNI</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WINDOWS,APP_OMNI</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;WINDOWS,APP_OMNI</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\IconMain.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PInvoke.Kernel32, Version=0.5.0.0, Culture=neutral, PublicKeyToken=9e300f9f87f04a7a, processorArchitecture=MSIL">
+      <HintPath>..\packages\PInvoke.Kernel32.0.5.184\lib\net45\PInvoke.Kernel32.dll</HintPath>
+    </Reference>
+    <Reference Include="PInvoke.User32, Version=0.5.0.0, Culture=neutral, PublicKeyToken=9e300f9f87f04a7a, processorArchitecture=MSIL">
+      <HintPath>..\packages\PInvoke.User32.0.5.184\lib\net45\PInvoke.User32.dll</HintPath>
+    </Reference>
+    <Reference Include="PInvoke.Windows.Core, Version=0.5.0.0, Culture=neutral, PublicKeyToken=9e300f9f87f04a7a, processorArchitecture=MSIL">
+      <HintPath>..\packages\PInvoke.Windows.Core.0.5.184\lib\net35\PInvoke.Windows.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PInvoke.Windows.ShellScalingApi, Version=0.5.0.0, Culture=neutral, PublicKeyToken=9e300f9f87f04a7a, processorArchitecture=MSIL">
+      <HintPath>..\packages\PInvoke.Windows.ShellScalingApi.0.5.184\lib\net45\PInvoke.Windows.ShellScalingApi.dll</HintPath>
+    </Reference>
+    <Reference Include="SciterSharpWindows, Version=2.0.85.0, Culture=neutral, PublicKeyToken=917100d643775a9e, processorArchitecture=MSIL">
+      <HintPath>..\packages\SciterSharpWindows.2.0.85\lib\net45\SciterSharpWindows.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Validation, Version=2.4.0.0, Culture=neutral, PublicKeyToken=2fc06f0d701809a7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Validation.2.4.22\lib\net45\Validation.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\HIDLinux.cs">
+      <Link>Src\Ion\HIDLinux.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\HIDOSX.cs">
+      <Link>Src\Ion\HIDOSX.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\HIDWindows.cs">
+      <Link>Src\Ion\HIDWindows.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\IonApp.cs">
+      <Link>Src\Ion\IonApp.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\IonConsts.cs">
+      <Link>Src\Ion\IonConsts.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\IonWeb.cs">
+      <Link>Src\Ion\IonWeb.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\UpdateControl.cs">
+      <Link>Src\Ion\UpdateControl.cs</Link>
+    </Compile>
+    <Compile Include="Src\App.cs" />
+    <Compile Include="Src\ArchiveResource.cs" />
+    <Compile Include="Src\ConstsGlobals.cs" />
+    <Compile Include="Src\ConstsVersion.cs" />
+    <Compile Include="Src\Hosting\BaseHost.cs" />
+    <Compile Include="Src\Hosting\DlgLicense.cs" />
+    <Compile Include="Src\Hosting\FrameEvh.cs" />
+    <Compile Include="Src\Hosting\Host.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Src\Hosting\HostEvh.cs" />
+    <Compile Include="Src\Hosting\InternalDbg.cs" />
+    <Compile Include="Src\Hosting\WndHostDebugger.cs" />
+    <Compile Include="Src\SimpleBSON.cs" />
+    <Compile Include="Src\Tests.cs" />
+    <Compile Include="Src\Utilities\Mono.cs" />
+    <Compile Include="Src\ProgramOSX.cs" />
+    <Compile Include="Src\ProgramWL.cs" />
+    <Compile Include="Src\Hosting\Window.cs" />
+    <Compile Include="Src\State.cs" />
+    <Compile Include="Src\UI\DOMTree.cs" />
+    <Compile Include="Src\UI\Inspecting.cs" />
+    <Compile Include="Src\UI\WidgetTreePath.cs" />
+    <Compile Include="Src\Utilities\Utils.cs" />
+    <Compile Include="Src\Utilities\UtilsExtension.cs" />
+    <Compile Include="Src\Utilities\Win32Hwnd.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.manifest" />
+    <None Include="packages.config" />
+    <None Include="Resources\IconMain.ico" />
+    <None Include="res\debugger\colorizer.tis" />
+    <None Include="res\debugger\source-view.tis" />
+    <None Include="res\inspector\console.tis" />
+    <None Include="res\inspector\inspector.tis" />
+    <None Include="res\inspector\network.tis" />
+    <None Include="res\inspector\remote.tis" />
+    <None Include="res\ion_key.bin" />
+    <None Include="res\lib_settings\settings.tis" />
+    <None Include="res\popups\data_handler.tis" />
+    <None Include="res\popups\lib_colorpicker\colorpicker.tis" />
+    <None Include="res\popups\lib_colortouch\common.tis" />
+    <None Include="res\popups\lib_colortouch\sliderpicker.tis" />
+    <None Include="res\popups\popup_common.tis" />
+    <None Include="res\style\fontello\omni.ttf" />
+    <None Include="res\style\fonts\Shumi.otf" />
+    <None Include="res\shared_script.tis" />
+    <None Include="res\tis\consts.tis" />
+    <None Include="res\tis\omni.tis" />
+    <None Include="res\tis\state.tis" />
+    <None Include="res\tis\output.tis" />
+    <None Include="res\tis\keyboard.tis" />
+    <None Include="res\tis\toolbar.tis" />
+    <None Include="scripts\packfolder" />
+    <None Include="scripts\packOSX.sh" />
+    <None Include="scripts\packWindows.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\home\rfl.tis" />
+    <None Include="res\index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\..\sciter-sdk\bin.win\x64\sciter.dll">
+      <Link>sciter.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="res\debugger\debugger.html" />
+    <Content Include="res\debugger\source-code.css" />
+    <Content Include="res\img\blade_loadingprogress.gif" />
+    <Content Include="res\config.html" />
+    <Content Include="res\home\home.html" />
+    <Content Include="res\home\inc_footfx.html" />
+    <Content Include="res\home\inc_sysinfo.html" />
+    <Content Include="res\img\ajax_loader.png" />
+    <Content Include="res\img\alpha_grid.png" />
+    <Content Include="res\img\arrow.png" />
+    <Content Include="res\img\arrow_closed.png" />
+    <Content Include="res\img\arrow_open.png" />
+    <Content Include="res\img\back.png" />
+    <Content Include="res\img\bar_alpha.png" />
+    <Content Include="res\img\bar_hue.png" />
+    <Content Include="res\img\bar_saturation.png" />
+    <Content Include="res\img\bg_blue.png" />
+    <Content Include="res\img\close2.png" />
+    <Content Include="res\img\elmenu_btn.png" />
+    <Content Include="res\img\elmenu_btn_hover.png" />
+    <Content Include="res\img\forward.png" />
+    <Content Include="res\img\grid.png" />
+    <Content Include="res\img\grid2.png" />
+    <Content Include="res\img\hud_resize_corner.png" />
+    <Content Include="res\img\icon-inspector.png" />
+    <Content Include="res\img\logo_shadow.png" />
+    <Content Include="res\img\logo_styled.png" />
+    <Content Include="res\img\new.png" />
+    <Content Include="res\img\noise.png" />
+    <Content Include="res\img\picker.png" />
+    <Content Include="res\img\shadow.png" />
+    <Content Include="res\img\swatch.png" />
+    <Content Include="res\img\under-construction.gif" />
+    <Content Include="res\img\waves-bg.png" />
+    <Content Include="res\img\wip_bg.gif" />
+    <Content Include="res\inspector\inspector.css" />
+    <Content Include="res\inspector\inspector.html" />
+    <Content Include="res\inspector\unittest.html" />
+    <Content Include="res\ion_rsa.txt" />
+    <Content Include="res\lib_menu\menu-chrome.css" />
+    <Content Include="res\lib_menu\toggler-knob.svg" />
+    <Content Include="res\lib_menu\toggler2.css" />
+    <Content Include="res\lib_menu\unittes.html" />
+    <Content Include="res\lib_menu\unittest.html" />
+    <Content Include="res\lib_settings\unittest.html" />
+    <Content Include="res\licensing.html" />
+    <Content Include="res\popups\data_popup.css" />
+    <Content Include="res\popups\lib_colorpicker\colorpicker.html" />
+    <Content Include="res\popups\lib_colortouch\bg2.jpg" />
+    <Content Include="res\popups\lib_colortouch\common.css" />
+    <Content Include="res\popups\lib_colortouch\frm_cbg.html" />
+    <Content Include="res\popups\lib_colortouch\frm_colorize.html" />
+    <Content Include="res\popups\lib_colortouch\frm_hue-saturation.html" />
+    <Content Include="res\popups\lib_colortouch\frm_hue2.html" />
+    <Content Include="res\popups\lib_colortouch\unittest.html" />
+    <Content Include="res\popups\lib_texturepicker\unittest.html" />
+    <Content Include="res\popups\popup_colorpicker.html" />
+    <Content Include="res\popups\popup_colortouch.html" />
+    <Content Include="res\popups\popup_common.css" />
+    <Content Include="res\popups\popup_console.html" />
+    <Content Include="res\popups\popup_data.html" />
+    <Content Include="res\popups\popup_data_image.html" />
+    <Content Include="res\popups\popup_fontpicker.html" />
+    <Content Include="res\popups\popup_my.html" />
+    <Content Include="res\popups\popup_snippet.html" />
+    <Content Include="res\popups\popup_texturepicker.html" />
+    <Content Include="res\popups\unittest.html" />
+    <Content Include="res\style\fontello\omni-font.css" />
+    <Content Include="res\style\fontello\omni-svg.css" />
+    <Content Include="res\style\fonts\Shumi-font.css" />
+    <Content Include="res\style\global.css" />
+    <Content Include="res\style\index.css" />
+    <Content Include="res\unittest.html" />
+    <Content Include="scripts\packfolder.exe" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"$(ProjectDir)scripts\packWindows.bat" $(ConfigurationName)</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

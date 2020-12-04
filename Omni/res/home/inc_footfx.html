@@ -1,0 +1,50 @@
+﻿<style>
+	#area-foot
+	{
+		flow: stack;
+		vertical-align: middle;
+		height: 180px;
+		background: linear-gradient(top, #00a0e6, #00a0e6);/*so it animates*/
+	}
+
+	#logo
+	{
+		size: 145px;
+		margin-left: 30px;
+		background: url(../img/logo_shadow.png) stretch;
+	}
+
+	#shadowfx
+	{
+		size: *;
+		opacity: 0;
+		background-image: url(../img/shadow.png);
+		background-repeat: no-repeat;
+		background-position: center left;
+		margin-left: -160px;
+	}
+
+	@const ANIM_DURATION: 380ms;
+	#area-foot:hover
+	{
+		height: 290px;
+		transition: height(quad-in-out, @ANIM_DURATION) background(linear, @ANIM_DURATION);
+		background: linear-gradient(top, @CLR_BLUE, @CLR_BLUE);
+	}
+	#area-foot:hover #logo
+	{
+		size: 190px;
+		background-image: url(../img/logo_styled.png);
+		transition: size(quad-out, @ANIM_DURATION);
+	}
+	#area-foot:hover #shadowfx
+	{
+		opacity: 0.45;
+		transition: opacity(cubic-out, @ANIM_DURATION);
+	}
+</style>
+
+<div #area-foot>
+	<div #logo></div>
+	<div #shadowfx></div>
+</div>

@@ -1,0 +1,138 @@
+﻿<html>
+<script type="text/tiscript">
+	include "../lib_settings/settings.tis";
+
+	self#add-btn.onClick = function() {
+		CreateItem({});
+	};
+	self#petlist.on("click", ".btn-play", function() {
+		el_console.EvalInput(this.$p(section).$(.code).text);
+		self.closePopup();
+	});
+	self#petlist.on("click", ".btn-rmv", function() {
+		this.$p(section).remove();
+	});
+
+	self#petlist.onKey = function(evt) {
+		if(evt.target.$is(textarea) && evt.type==Event.KEY_DOWN && evt.keyCode==Event.VK_TAB)
+		{
+			if(evt.ctrlKey==false && evt.shiftKey==false)
+				evt.target.insertText("    ");
+			return true;
+		}
+	};
+
+	function CreateItem(data)
+	{
+		var el_item = $(section.tpl).clone();
+		el_item.@.removeClass("tpl");
+		self#petlist.append(el_item);
+
+		if(data.code)
+			el_item.$(.code).text = data.code;
+	}
+
+	function SaveSnippets()
+	{
+		Settings.ns_data.snippets = [];
+		for(var el in self#petlist.$$(section))
+			Settings.ns_data.snippets.push({ code: el.$(.code).text });
+	}
+	view.on("statechange", function() {
+		if(view.state == View.WINDOW_HIDDEN)
+			SaveSnippets();
+	});
+	
+	function LoadSnippets()
+	{
+		//if(!Settings.ns_data.snippets)
+		if(true)
+		{
+			Settings.ns_data.snippets = [
+				{ code: `// console.show() media vars\nconsole.show(view.mediaVars());` },
+				{ code: `// outlines in blue color\nthis.style#outline = this.omni_outline ? undefined : "solid 2px blue";\nthis.omni_outline = \n  !this.omni_outline;` },
+				/*{ code: `// changes the ID\nthis.@#id = "newID";` },
+				{ code: `// border in red color\nthis.style#border = this.omni_border ? undefined : "solid 2px red";\nthis.omni_border = \n  !this.omni_border;` },*/
+			];
+		}
+		
+		for(var item in Settings.ns_data.snippets)
+			CreateItem(item);
+	}
+	LoadSnippets();
+</script>
+
+<style>
+	@import url(../style/global.css);
+	@import url(popup_common.css);
+
+	html { size: 424px 260px; }
+	body { overflow-y: auto; }
+
+	#area-header
+	{
+		background-image: url(../img/grid.png);
+	}
+
+	section
+	{
+		flow: horizontal;
+		border-bottom: solid 1px #aaa;
+	}
+	section.tpl { display: none; }
+
+	section .code
+	{
+		size: * ;
+		display: block;
+		border: none;
+		background: none;
+		font-family: monospace;
+		overflow: hidden;
+	}
+	section .code:focus
+	{
+		min-height: max-content;
+		max-height: 200px;
+		overflow: scroll-indicator;
+		background: white;
+	}
+
+	#petlist > section .actions
+	{
+		size: min-content *;
+		flow: horizontal;
+		padding: 0 1px;
+		border-left: solid 1px #aaa;
+		min-height: 0;
+	}
+
+	button { display: block; padding: 0 4px; height: 20px; opacity: 0.5; font-size: 11px; }
+	button:hover { opacity: 1; }
+	button i.ft { font-rendering-mode: classic; }
+
+	#add-btn { margin-left: *; margin-right: 1px; }
+</style>
+
+<body>
+	<div #area-header>
+		<img src="../img/hud_resize_corner.png" />
+	</div>
+
+	<section .tpl>
+		<textarea .code />
+
+		<div .actions>
+			<button .light.btn-play><i class="ft ft-play" /></button>
+			<button .light.btn-rmv><i class="ft ft-cancel-1" /></button>
+		</div>
+	</section>
+
+	<div #petlist>
+		
+	</div>
+
+	<button #add-btn.light><i class="ft ft-plus-squared" /></button>
+	<!--<button #save-btn.light><i class="fa fa-floppy-o" /></button>-->
+</body>
+</html>

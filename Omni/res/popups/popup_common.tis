@@ -1,0 +1,25 @@
+if(true)
+{
+	Utils.emulateMoveWnd(self#area-header.$(header));
+	Utils.emulateResizeWnd(self#area-header.$(img));
+}
+
+$(close).on("click", function(evt) {
+	view.close();
+});
+
+if(!self.@#nomove)
+{
+	self.post(:{
+		var (x,y) = view.box(#position, #border, #screen);
+		view.move(x-10, y-10);
+	});
+}
+	
+
+self.on("keydown", function(evt) {
+	if(evt.keyCode==Event.VK_ESCAPE)
+		view.close();
+	else
+		View.Proxy_HandleGlobalAccelerator(evt);
+});

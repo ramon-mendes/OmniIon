@@ -1,0 +1,17 @@
+ArchiveResource.cs
+IconBundler.exe
+sciter.dll
+# /PublishCompile
+/ReleaseInfo
+*.psd
+OmniLite2.sln
+
+# Garbage
+.DS_Store
+**/bin/Debug
+**/bin/Release
+obj/
+packages/
+.vs/
+*.sdf
+*.db

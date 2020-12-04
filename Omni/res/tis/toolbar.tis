@@ -1,0 +1,89 @@
+// -------------------------------------------------------------------
+// Main menu
+self#btn-main.onClick = ::this.popup(self#menu-main, Utils.popupAttachment(9, 7));
+self#mi-close.onClick = ::State.ClosePage();
+$(#menu-main #mi-autorefresh).subscribe(function(evt) {
+	UX_ToggleAutoRefresh();
+	return true;
+}, Event.MOUSE, Event.MOUSE_UP | Event.SINKING);
+self#mi-edit.onClick = ::UX_EditFile();
+self#mi-reload.onClick = ::State.ReloadPage();
+self#mi-reveal.onClick = ::view.Host_RevealPath(State._page_url);
+self#mi-config.onClick = ::self.post(::view.dialog(self.url("config.html")));
+self#mi-exit.onClick = ::view.close();
+
+
+// -------------------------------------------------------------------
+// Toolbar buttons
+self#btn-reload.onClick = ::State.ReloadPage();
+self#btn-debugger.onClick = ::View.Proxy_DebuggerShow();
+self#btn-inspector.onClick = ::Inspector.ToggleInspector();
+self#btn-sciter-inspector.onClick = function() {
+	view.Host_CheckInspector();
+	view.connectToInspector(self#frameph);
+};
+
+
+// Menu itens
+$(#page-toolbar #mi-screenshot).onClick = function()
+{
+	var (w,h) = self#frameph.box(#dimension, #margin);
+	var img = new Image(w, h, self#frameph);
+	var bytes = img.toBytes();
+	var path = view.selectFile(#save, "PNG Files (*.png)|*.png|All Files (*.*)|*.*", "png");
+	if(path)
+		bytes.save(path);
+
+	return true;
+};
+
+$(#page-toolbar #mi-aero).on("click", "li", function(evt) {
+	var id = eval("#" + evt.target.value);
+	self.@#blur = id==#none ? undefined : true;
+	view.windowBlurbehind = id;
+});
+
+$(#page-toolbar #mi-autorefresh).subscribe(function(evt) {
+	UX_ToggleAutoRefresh();
+	return true;
+}, Event.MOUSE, Event.MOUSE_UP | Event.SINKING);
+
+$(#page-toolbar #mi-alwaystop).subscribe(function(evt) {
+	UX_ToggleTopmost();
+	return true;
+}, Event.MOUSE, Event.MOUSE_UP | Event.SINKING);
+
+self#menu-font.onControlEvent = function(e)
+{
+	if(e.type==Event.BUTTON_CLICK)
+	{
+		switch(this.$(:checked).value)
+		{
+		case "default":
+			self#frameph[0].style#font-rendering-mode = undefined;
+			break;
+		case "classic-normal":
+			self#frameph[0].style#font-rendering-mode = "classic";
+			break;
+		case "enhanced-normal":
+			self#frameph[0].style#font-rendering-mode = "enhanced";
+			break;
+		}
+	}
+}
+
+self#menu-smoothscroll.onControlEvent = function(e)
+{
+	if(e.type==Event.BUTTON_CLICK)
+	{
+		switch(this.$(:checked).value)
+		{
+		case "default":
+			self#frameph[0].style#scroll-manner = "scroll-manner(animation:true)";
+			break;
+		case "disable":
+			self#frameph[0].style#scroll-manner = "scroll-manner(animation:false)";
+			break;
+		}
+	}
+}

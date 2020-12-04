@@ -1,0 +1,53 @@
+@import url(fontello/omni-font.css);
+@import url(fonts/shumi-font.css);
+
+
+@const CLR_BLUE: #0064c8;
+@const CLR_BLUE2: #2d4a8c;
+@const FF_MONOSPACE: Consolas, monospace;
+
+
+html { font-family: system; font-rendering-mode: classic; overflow: hidden; }
+@media min-resolution > 96
+{
+	html, input, button, widget, select { font-size: 13px; }// DPI fix
+}
+body { margin: 0; }
+vflow { display: block; flow: vertical; }
+hflow { display: block; flow: horizontal; }
+.dbg { outline: solid 1px red; }
+pre { font-family: @FF_MONOSPACE; }
+
+i[class*=icon-]
+{
+	font-rendering-mode: enhanced;
+	vertical-align: middle;
+}
+a, mark { color: #51a8ff; text-decoration: none; cursor: pointer; }
+menu li:checked { foreground: url(stock:checkmark) no-repeat 10px center; }
+button { border: none; border-radius: 0; }
+.hide { visibility: none; }
+
+.std-btn
+{
+	flow: horizontal;
+	border-radius: 3px;
+	background: #97d3f1;
+	color: white;
+	font-size: 12px;
+}
+.std-btn:hover, .std-btn:owns-popup
+{
+	cursor: pointer;
+	background: @CLR_BLUE;
+}
+.std-btn:disabled
+{
+	background: #c2c2c2;
+}
+.std-btn i { margin-bottom: 1px; }
+
+accesskey
+{
+	aspect: AccesskeySetup;
+}

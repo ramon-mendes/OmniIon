@@ -1,0 +1,84 @@
+﻿<!-- OmniView:on -->
+<body>
+
+<script type="text/tiscript">
+	include "common.tis";
+	include "sliderpicker.tis";
+
+	class HueBar : Sliderpicker
+	{
+		function onUpdatePos(p, input)
+		{
+			var hue = String.printf("%.2f", 360.0*p);
+			if(!input)
+				self#hue.$(input).value = 360*p;
+			
+			transforms.hue = "hue(" + hue + ")";
+			UpdateTransforms();
+		}
+	}
+	
+	class SaturationBar : Sliderpicker
+	{
+		function onUpdatePos(p, input)
+		{
+			var saturation = String.printf("%.2f", 1-p);
+			if(!input)
+				self#saturation.$(input).value = saturation;
+			
+			transforms.saturation = "saturation(" + saturation + ")";
+			UpdateTransforms();
+		}
+	}
+
+	$(#hue input).onValueChanged = function() {
+		$(.bar.hue).setValue(this.value/360.0);
+	};
+	$(#saturation input).onValueChanged = function() {
+		$(.bar.saturation).setValue(this.value);
+	};
+	$(#opacity input).onValueChanged = function() {
+		$(.bar.opacity).setValue(this.value);
+	};
+</script>
+
+<section #hue>
+	<div .header>
+		Hue
+	</div>
+
+	<div .area-inputs.hflow>
+		<input!integer min=0 max=360 step=5 style="margin-right: 5px" />
+		<div .bar.hue.hue-slider><div .picker /></div>
+	</div>
+</section>
+
+<section #saturation>
+	<div .header>
+		Saturation
+	</div>
+		
+	<div .area-inputs.hflow>
+		<input!decimal min=0 max=1 step=0.05 style="margin-right: 5px" />
+		<div .bar.saturation.saturation-slider><div .picker /></div>
+	</div>
+</section>
+
+<section #opacity>
+	<div .header>
+		Opacity
+	</div>
+		
+	<div .area-inputs.hflow>
+		<input!decimal min=0 max=1 step=0.05 style="margin-right: 5px" />
+		<div .bar.opacity.opacity-slider><div .picker /></div>
+	</div>
+</section>
+
+<section .area-actions>
+	<button .std-btn #btn-help><i .ft.ft-help-circled /></button>
+	<button .std-btn #btn-copycss><i .ft.ft-docs />&nbsp;Copy CSS property</button>
+	<button .std-btn #btn-clear><i .ft.ft-docs />&nbsp;Clear</button>
+</section>
+
+</body>

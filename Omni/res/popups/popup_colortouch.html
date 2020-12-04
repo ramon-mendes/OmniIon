@@ -1,0 +1,67 @@
+﻿<html nomove=true>
+<script type="text/tiscript">
+	include "popup_common.tis";
+
+	var params = view.parameters;
+	var transforms = {};
+
+	$(header).text = "#" + params.mode + " #" + params.what;
+	$(frame).load(View.Proxy_url("popups/lib_colortouch/frm_" + params.mode.toString() + ".html"));
+	
+	
+	function UpdateTransforms()
+	{
+		var cssval = "";
+		for(var (k,v) in transforms)
+			cssval += " ~ " + v;
+		
+		if(params.what==#bg)
+			params.el.style#background-image-transformation = cssval;
+		else
+			params.el.style#foreground-image-transformation = cssval;
+	}
+
+	function ClearCSS()
+	{
+		if(params.what==#bg)
+			params.el.style#background-image-transformation = undefined;
+		else
+			params.el.style#foreground-image-transformation = undefined;
+		view.close();
+	}
+
+	function CopyCSS()
+	{
+		var cssval = "";
+		for(var (k,v) in transforms)
+			cssval += (cssval ? " ~ " : "") + v;
+		
+		if(params.what==#bg)
+			cssval = "background-image-transformation: " + cssval + ";";
+		else
+			cssval = "foreground-image-transformation: " + cssval + ";";
+		view.clipboard(#put, cssval);
+	}
+</script>
+
+<style>
+	@import url(../style/global_base.css);
+	@import url(popup_common.css);
+
+	html { size: 260px 324px; }
+	#main { size: *; padding-top: 3px; overflow-y: scroll-indicator; overflow-x: hidden; }
+	#main form { size: *; }
+</style>
+
+<body>
+	<div #area-header title="Press ESC to close">
+		<img src="../img/hud_resize_corner.png" />
+		<header />
+		<close />
+	</div>
+
+	<div #main>
+		<frame content-style="lib_colortouch/common.css" />
+	</div>
+</body>
+</html>

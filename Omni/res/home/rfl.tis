@@ -1,0 +1,82 @@
+namespace RFL
+{
+	const cMAX_ENTRYS = 5;
+	var list_path = [];
+	var list_name = [];
+	var list_elem = [];
+
+	function StoreEntrys()
+	{
+		var data = [];
+		for( var (i,v) in list_path )
+			data[i] = { path: list_path[i], name: list_name[i] };
+		Settings.ns_data.rfl = data;
+		Settings.StoreWork();
+	}
+	function RestoreEntrys()
+	{
+		self#rfl.on("click", ".entry", function() {
+			view.Host_OpenFile(list_path[list_path.length-1-this.index]);
+			//View.Proxy_NS.View_LoadURL(, true);
+		});
+		self#rfl-clear-list.on("click", function() {
+			ClearEntrys();
+		});
+
+		var rfl_entrys = Settings.ns_data.rfl;
+		if( !rfl_entrys )
+			return;
+		if( rfl_entrys.length > cMAX_ENTRYS )
+			rfl_entrys = rfl_entrys.slice( rfl_entrys.length-cMAX_ENTRYS );
+		for( var item in rfl_entrys )
+			CreateItem(item.name, item.path);
+	}
+	function ClearEntrys()
+	{
+		if(list_elem.length)
+		{
+			for( var el_entry in list_elem )
+				el_entry.remove();
+		
+			list_path = [];
+			list_name = [];
+			list_elem = [];
+			Settings.ns_data.rfl = [];
+		}
+	}
+	function AddUserEntry(url)
+	{
+		//log(url);
+		url = url.replace("\\", "/");
+		assert(url[0..7] == "file://");
+		
+		var path = url[7..$];
+		var name = path %~ '/';
+
+		var entry_rmv = list_path.indexOf(path);
+		if( entry_rmv==-1 && list_path.length==cMAX_ENTRYS )
+			entry_rmv = 0;
+		if( entry_rmv!=-1 )
+		{
+			list_path.remove(entry_rmv);
+			list_name.remove(entry_rmv);
+			list_elem[entry_rmv].remove();
+			list_elem.remove(entry_rmv);
+		}
+		CreateItem(name, path);
+
+		StoreEntrys();
+	}
+	function CreateItem(name, path)
+	{
+		var el_entry = $(.dummy-entry).clone();
+		el_entry.@.removeClass("dummy-entry");
+		self#section-rfl[1].prepend(el_entry);
+		el_entry.$(.name).text = name;
+		el_entry.@#title = path;
+
+		list_path.push(path);
+		list_name.push(name);
+		list_elem.push(el_entry);
+	}
+}

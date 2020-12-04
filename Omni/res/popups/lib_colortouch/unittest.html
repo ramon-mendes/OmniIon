@@ -1,0 +1,24 @@
+﻿<html>
+<script type="text/tiscript">
+	self.post(::console.colortouch( $(img), #fg, #hue-saturation) );
+	self#touch.onClick = ::console.colortouch( $(img), #fg, #hue-saturation);
+</script>
+
+<style>
+	@import url(../style/global.css);
+
+	body { margin: 0; background: #f3f3f3; }
+
+	img
+	{
+		size: 200px;
+	}
+</style>
+
+
+<body>
+	<button #touch>Touch</button>
+	<br />
+	<img src="bg2.jpg" />
+</body>
+</html>

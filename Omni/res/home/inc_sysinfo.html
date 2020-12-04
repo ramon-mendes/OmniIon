@@ -1,0 +1,141 @@
+﻿<!-- OmniView:on -->
+<script type="text/tiscript">
+	include "../lib_settings/settings.tis";
+
+	self#vapp.text = view.omniview ? "MEOW" : view.Host_AppVersion();
+
+	self#vsciter.$(span).text = String.printf("%d.%d.%d.%d",
+		(Sciter.VERSION >> 16) & 0xffff, Sciter.VERSION & 0xffff,
+		(Sciter.REVISION >> 16) & 0xffff, Sciter.REVISION & 0xffff);
+
+	var gfxids =
+		System.PLATFORM == "Windows" ? ["?","GDI+","WARP","D2D"]
+		: System.PLATFORM == "OSX" ? ["?","CoreGraphics","OpenGL" ]
+		: [ "?" ];
+
+	$(#gfx span).text = gfxids[view.backend];
+
+	$(#gfx a).onClick = function() {
+		if(Utils.IsOSX)
+			this.popup(self#menu-gfx-osx, Utils.popupAttachment(1, 7));
+		else
+			this.popup(self#menu-gfx-win, Utils.popupAttachment(1, 7));
+	};
+
+	$(#gfx a).on("click", "li", function() {
+		var gfx = this.@#command;
+		view.Host_ChangeGFX(gfx);
+		view.close();
+		return true;
+	});
+
+	var expando = view.Host_IonExpando();
+	var trial_active = expando.is_trial;
+	if(trial_active)
+	{
+		self#license.html = "<span .red-days>Trial version</span>";
+		self#purchase.onClick = ::Sciter.launch("http://misoftware.com.br/Omni");
+	} else {
+		var license_name = expando.name();
+		self#license.text = license_name;
+		self#purchase.remove();
+	}
+
+	// Update Omni check
+	self.post(function() {
+		self.request(function(data) {
+			var ver = data.toString().toInteger();
+			var version_int = View.omniview ? 0 : view.Host_AppVersionInt();
+			if(ver > version_int)
+			{
+				var major = ver >> 16;
+				var minor = ver & 0xffff;
+
+				self#info-update.$(a).onClick = ::Sciter.launch("http://misoftware.com.br/Omni");
+				self#info-update.$(span).text = major + "." + minor;
+				self#info-update.show();
+			}
+		}, #get, "http://misoftware.com.br/API/OmniLastVersion");
+	});
+</script>
+
+<style>
+	dl#sysinfo
+	{
+		flow: row(dt,dd);
+		border-spacing: 10px 5px;
+	}
+	dl#sysinfo > dt
+	{
+		width: max-intrinsic;
+	}
+
+	dl#sysinfo > dd
+	{
+		width: max-intrinsic;
+		font-weight: bold;
+		color: #444;
+	}
+
+	dl#sysinfo .red-days { color: #e43131; }
+	dl#sysinfo #purchase { text-decoration: underline; }
+
+	#info-update
+	{
+		visibility: none;
+		margin-top: -7px;
+		padding: 6px 10px;
+
+		background: #ededed;
+		border: solid 2px #d5d5d5;
+
+		line-height: 20px;
+	}
+	#info-update a { color: #0167cc; }
+</style>
+
+
+<div .title>System information</div>
+
+<menu .context #menu-sciterver>
+	<caption>Run Omni with specific Sciter DLL:</caption>
+	<hr />
+	<li command="add-dll">Search and add DLL ...</li>
+	<hr />
+
+	<div #dll-list>
+		<li disabled>No DLL added</li>
+	</div>
+</menu>
+
+<menu .context #menu-gfx-osx>
+	<li command="auto">Auto</li>
+	<li command="cg">CoreGraphics</li>
+	<li command="skia">Skia</li>
+	<li command="skia_opengl">Skia OpenGL</li>
+</menu>
+
+<menu .context #menu-gfx-win>
+    <li command="auto">Auto</li>
+    <li command="gdi">GDI+</li>
+    <li command="warp">WARP</li>
+    <li command="d2d">D2D</li>
+</menu>
+
+<dl #sysinfo>
+	<dt>Omni version:</dt>
+	<dd #vapp></dd>
+	<dt>Sciter-lib version:</dt>
+	<dd #vsciter><span /></dd> <!--<a style="display: inline-block">▼</a>-->
+	<dt>GFX backend:</dt>
+	<dd #gfx><span /> <a>▼</a></dd>
+	<dt>Licensed to:</dt>
+	<dd #license></dd>
+	<dt></dt>
+	<dd><a href="" #purchase>Purchase an Omni license!</a></dd>
+</dl>
+
+<div #info-update>
+	An updated Omni version is available!
+	<br />Latest version: <b><span></span> - <a href="">Download it</a></b>
+</div>

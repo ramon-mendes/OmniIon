@@ -1,0 +1,107 @@
+const	RT_DATA_HTML = 0,
+		RT_DATA_IMAGE = 1,
+		RT_DATA_STYLE = 2,
+		RT_DATA_CURSOR = 3,
+		RT_DATA_SCRIPT = 4,
+		RT_DATA_RAW = 5;
+
+function Extern_NetworkNewResource(rs)
+{
+	var el_tr = new Element(#tr);
+	self#net-table.$(tbody).append(el_tr);
+
+	el_tr.rs_url = rs.url;
+	el_tr.rs_dataType = rs.dataType;
+
+	var strtype;
+	switch(rs.dataType)
+	{
+	case RT_DATA_HTML: strtype = "RT_DATA_HTML"; break;
+	case RT_DATA_IMAGE: strtype = "RT_DATA_IMAGE"; break;
+	case RT_DATA_STYLE: strtype = "RT_DATA_STYLE"; break;
+	case RT_DATA_CURSOR: strtype = "RT_DATA_CURSOR"; break;
+	case RT_DATA_SCRIPT: strtype = "RT_DATA_SCRIPT"; break;
+	case RT_DATA_RAW: strtype = "RT_DATA_RAW"; break;
+	}
+
+	el_tr.@.addClass("loading");
+	el_tr.append("<td><i .ft.ft-hourglass /></td>");
+	el_tr.append("<td>" + (rs.url %~ "/") + "</td>");
+	el_tr.append("<td>" + rs.url + "</td>");
+	el_tr.append("<td>-</td>");
+	el_tr.append("<td>-</td>");
+	if(rs.principal)
+		el_tr.append("<td>" + rs.principal.tagname().htmlEscape() + "</td>");
+	else
+		el_tr.append("<td></td>");
+	el_tr.append("<td>" + strtype + "</td>");
+
+	self.post(::self#tab-network.scrollTo(0, Integer.MAX));
+
+	return el_tr.index;
+}
+
+function Extern_NetworkLoadedResource(rs)
+{
+	var el_tr = self#net-table.$(tbody)[rs.index];
+	if(!el_tr)
+		log(rs);
+	if(el_tr)
+	{
+		el_tr.rs_data = rs.data;
+
+		el_tr.@.removeClass("loading");
+		if(rs.status==0 || rs.status==200)
+			el_tr[0].html = "<span><i .ft.ft-ok-outline /> " + rs.status + "</span>";
+		else {
+			el_tr[0].html = "<span><i .ft.ft-cancel-circled2-1 /> " + rs.status + "</span>";
+			el_tr.@.addClass("error");
+		}
+		el_tr[3].text = String.printf("%.2f KB", rs.size/1024.0);
+		el_tr[4].text = rs.loadTime + "ms";
+	
+		assert(el_tr.rs_dataType==rs.dataType);
+	}
+}
+
+self#net-table.$(tbody).on("click", "tr", function(evt) {
+	this.state.current = true;
+	var (x,y) = view.cursorLocation();
+
+	if(this.rs_dataType==RT_DATA_IMAGE)
+	{
+		self#netpreview-img.$(.area-img).html = "<img src='" + this.rs_url + "' />";
+		self.popup(self#netpreview-img, x+10, y);
+	} else {
+		var txt = this.rs_data;
+		if(txt)
+		{
+			txt = txt.replace(/\t/g, "    ");
+			self#netpreview-txt.$(.area-txt).value = txt;
+			self.popup(self#netpreview-txt, x+10, y);
+		}
+	}
+});
+
+self#net-table.on("click", "#network-menu li", function(evt) {
+	var el_tr = self#net-table.$(tr:current);
+	switch(evt.target.@#command)
+	{
+	case "clear":
+		self#net-table.$(tbody).clear();
+		break;
+	case "copy":
+		if(el_tr)
+		{
+			var txt = el_tr[2].text;
+			view.clipboard(#put, txt);
+			view.clipboard(#put, txt);// sometimes it doesn't copy the first time..
+		}
+		break;
+	case "open":
+		if(el_tr)
+			view.Host_OpenURL(el_tr[2].text);
+		break;
+	}
+	return true;
+});

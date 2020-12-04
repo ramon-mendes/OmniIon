@@ -1,0 +1,363 @@
+class DomTreeBehavior : Behavior
+{
+	var el_selected;
+	var el_hover;
+
+	function onControlEvent(evt)
+	{
+		switch(evt.type)
+		{
+			case Event.SELECT_SELECTION_CHANGING:
+				//log("Event.SELECT_SELECTION_CHANGING");// where is the Event.SELECT_SELECTION_CHANGING event?
+				break;
+
+			case Event.SELECT_SELECTION_CHANGED:
+				this.Host_OnOptionSelect();
+				el_selected = this.$(option:checked);
+				break;
+
+			case Event.MENU_ITEM_CLICK:
+				switch(evt.target.@#command)
+				{
+				case "copyhtml":
+					{
+						var el = view.Host_GetInspectedElement();
+						if(el)
+							view.clipboard(#put, el.outerHtml);
+					}
+					break;
+
+				case "tools":
+					{
+						var el = view.Host_GetInspectedElement();
+						if(el)
+							Extern_InspectElement(el);
+					}
+					break;
+
+				case "data":
+					{
+						var el = view.Host_GetInspectedElement();
+						if(el)
+							console.show(el);
+						break;
+					}
+
+				case "remove":
+					this.Host_OnOptionDelete();
+					break;
+				}
+				return true;
+		}
+	}
+
+	/*function onValueChanged()
+	{
+	}*/
+
+	function onMouse(evt)
+	{
+		if(evt.type==Event.MOUSE_MOVE)
+		{
+			var el_opt = evt.target.$p(option);
+			if(el_opt)
+			{
+				this.Host_OnOptionHover(el_opt.@#value.toInteger());
+			}
+		}
+		else if(evt.type==Event.MOUSE_LEAVE)
+		{
+			this.Host_OnEndHover()
+		}
+		else if(evt.type==Event.MOUSE_DOWN && evt.propButton)// right mouse click
+		{
+			var el_opt = evt.target.$p(option);
+			if(el_opt)
+			{
+				this.value = el_opt.@#value;
+				this.sendEvent(Event.SELECT_SELECTION_CHANGED);
+			}
+		}
+	}
+
+	function onKey(evt)
+	{
+		// delete key press
+		if(evt.type==Event.KEY_DOWN && el_selected &&
+			(evt.keyCode==Event.VK_DELETE || evt.keyCode==Event.VK_BACK))
+		{
+			//el_selected.remove();
+			this.Host_OnOptionDelete();
+		}
+	}
+
+	function NavigateToPath(uid, uidstack)// expand nodes
+	{
+		var el_option = this;// TODO: why console.dom() calling it twice?
+
+		for(var it_uid in uidstack)
+		{
+			el_option = el_option.$([value={it_uid}]);
+			//assert(el_option);
+			if(!el_option)
+			{
+				log("Failed to navigate to DOM element");// happens with console.dom() at page load
+				return;
+			}
+
+			//if(el_option.length)
+			if(el_option.state.collapsed)
+				el_option.state.expanded = true;
+
+			if(it_uid==uid)
+				break;
+		}
+
+		//this.post(function() {// post() solves an AV problem
+			this.value = uid;
+			el_selected = this.$(option:checked);
+		//});
+	}
+
+	function RenderDetails(details)
+	{
+		CSSdetails.RefreshDetails(details);
+	}
+}
+
+class ArrowDrawBehavior : Behavior
+{
+	function onClick()
+	{
+		self#dom-tree.Host_OnTagPathClick(this.uuid);// will not work if tree in not entirely populated (as is now)
+		self#dom-tree.state.focus = true;
+		this.state.current = true;
+		this.parent.refresh();
+	}
+
+	function onSize()
+	{
+		var (width,height) = this.box(#dimension, #padding);
+		height++;
+		const HHALF = height/2;
+		const TIPDEPTH = 12;
+		width -= TIPDEPTH;
+				
+		var path = new Graphics.Path();
+		path.moveTo(0, 0);
+		path.hlineTo(width, true);
+		path.lineTo(TIPDEPTH, HHALF, true);
+		path.lineTo(-TIPDEPTH, HHALF, true);
+		path.hlineTo(-width, true);
+		path.lineTo(TIPDEPTH, -HHALF, true);
+		path.lineTo(-TIPDEPTH, -HHALF, true);
+		path.close();
+		
+		this.path = path;
+		this.paintBackground = this.render;
+	}
+
+	function render(gfx)
+	{
+		if(this.state.current)
+		{
+			gfx
+				.fillColor( color(76,158,217) )
+				.drawPath(this.path);
+		}
+		return true;
+	}
+}
+
+
+namespace CSSdetails
+{
+	function UBoxAspect()
+	{
+		/*this.$(#box-margin).onClick = function() {
+			trace("margin");
+			return true;
+		}
+		this.$(#box-border).onClick = function() {
+			trace("border");
+			return true;
+		}
+		this.$(#box-padding).onClick = function() {
+			trace("padding");
+			return true;
+		}
+		this.$(#box-content).onClick = function() {
+			trace("content");
+			return true;
+		}*/
+	}
+
+	function RefreshDetails(details)
+	{
+		self.timer(500, function() {
+			this.post(function() {
+				var view_details = view.Host_RefreshElemDetails();
+				if(view_details)
+					RefreshDetails(view_details);
+			});
+		});
+
+		// BOX
+		var el_high = view.Host_GetInspectedElement();
+		{
+			assert(el_high);
+			//var det = el_high._used_style_properties_(); works!
+
+			var (wmargin, hmargin) = el_high.box(#dimension, #margin);
+			self#box-ux.$(code).text = wmargin + "x" + hmargin;
+
+			var (wcontent, hcontent) = el_high.box(#dimension, #inner);
+			self#box-content.text = wcontent + "x" + hcontent;
+
+			var (left, top, right, bottom) = el_high.box(#rect, #margin, #border);
+			self#box-margin[0][0].text = top ? top : "";
+			self#box-margin[0][1].text = left ? left : "";
+			self#box-margin[0][3].text = right ? right : "";
+			self#box-margin[0][4].text = bottom ? bottom : "";
+
+			(left, top, right, bottom) = el_high.box(#rect, #border, #padding);
+			self#box-border[0][0].text = top ? top : "";
+			self#box-border[0][1].text = left ? left : "";
+			self#box-border[0][3].text = right ? right : "";
+			self#box-border[0][4].text = bottom ? bottom : "";
+
+			(left, top, right, bottom) = el_high.box(#rect, #padding, #inner);
+			self#box-padding[0][0].text = top ? top : "";
+			self#box-padding[0][1].text = left ? left : "";
+			self#box-padding[0][3].text = right ? right : "";
+			self#box-padding[0][4].text = bottom ? bottom : "";
+
+			for(var el in self#box-ux.$$(.hside))
+			{
+				if(el.text.length > 3)
+					el.@.addClass("rotate");
+				else
+					el.@.removeClass("rotate");
+			}
+
+			var el_dds = self#itab-box.$$(dd);
+			el_dds[0].text = el_high.style#flow || "-";
+			el_dds[1].text = el_high.style#position || "-";
+			el_dds[2].text = el_high.style#display || "-";
+			el_dds[3].text = el_high.style#visibility || "-";
+			el_dds[4].text = el_high.style#overflow || "-";
+		}
+
+
+		// CSS COMPUTED
+		self#list-computed.clear();
+		var props = details.used_style;
+		if(props)
+		{
+			var props_names = [];
+			for(var name in props) props_names.push(name);
+			props_names.sort();
+
+			for(var name in props_names)
+			{
+				var prop_val = props[name];
+				if( prop_val !== undefined )
+					self#list-computed.$append(<li><dt>{name}:</dt><dd>{prop_val}</dd></li>);
+			}
+		}
+
+		// --> STATE
+		self#list-states.clear();
+		var states = details.states;
+		for(var (name,bit) in STATES)
+		{
+			if( (states & bit) != 0)
+				self#list-states.$append(<li><dt>:{name}</dt></li>);
+		}
+		
+		// --> ELPROPS
+		self#list-elprops.clear();
+		self#list-elprops.$append(<li><dt>isVisible:</dt><dd>{el_high.isVisible}</dd></li>);
+		self#list-elprops.$append(<li><dt>isEnabled:</dt><dd>{el_high.isEnabled}</dd></li>);
+
+		// CSS RULES
+		self#list-rules.clear();
+		var rules = details.applied_rules;
+		if(rules)
+		{
+			// shift runtime-style to top
+			if(rules[rules.length-1].type=="runtime-style")
+			{
+				var rstyle = rules.pop();
+				rules.unshift(rstyle);
+			}
+
+			// shift inline-style to top
+			if(rules[rules.length-1].type=="inline-style")
+			{
+				var rstyle = rules.pop();
+				rules.unshift(rstyle);
+			}
+
+			for(var rule in rules)
+			{
+				if(rule.type == "style-rule")
+				{
+					if(rule.selector=="::mark(omni-hilite)" || rule.selector=="::mark(omni-hiactual)")
+						continue;
+
+					var fn = (rule.file %~ "/") || rule.file;
+					self#list-rules.$append(<header><span.selector>{rule.selector}</span><a line={rule.lineNo} >{fn}({rule.lineNo})</a></header>);
+					//self#list-rules.$append(<header><span.selector>{rule.selector}</span><a href='{rule.file}' line={rule.lineNo} >{fn}({rule.lineNo})</a></header>);
+				}
+				else if(rule.type == "inline-style")
+					self#list-rules.$append(<header>inline style:</header>);
+				else if(rule.type == "runtime-style")
+					self#list-rules.$append(<header>runtime style:</header>);
+
+				var props_names = [];
+				for(var name in rule.properties)
+					props_names.push(name);
+				props_names.sort();
+
+				for(var name in props_names)
+				{
+					var prop_val = props[name];
+					if( prop_val !== undefined )
+						self#list-rules.$append(<li><dt>{name}:</dt><dd>{prop_val}</dd></li>);
+				}
+			}
+		}
+	}
+	
+	const STATES = {
+		"link":Element.STATE_LINK,
+		"hover":Element.STATE_HOVER,
+		"active":Element.STATE_ACTIVE,
+		"visited":Element.STATE_VISITED,
+		"focus":Element.STATE_FOCUS,
+		"tab-focus":Element.STATE_TAB_FOCUS,
+		"current":Element.STATE_CURRENT,
+		"checked":Element.STATE_CHECKED,
+		"unchecked":Element.STATE_UNCHECKED,
+		"disabled":Element.STATE_DISABLED,
+		"ready":Element.STATE_READY,
+		"read-only":Element.STATE_READONLY,
+		"expanded":Element.STATE_EXPANDED,
+		"collapsed":Element.STATE_COLLAPSED,
+		"incomplete":Element.STATE_INCOMPLETE,
+		"animating":Element.STATE_ANIMATING,
+		"focusable":Element.STATE_FOCUSABLE,
+		"anchor":Element.STATE_ANCHOR,
+		"popup":Element.STATE_POPUP,
+		"owns-popup":Element.STATE_OWNS_POPUP,
+		"empty":Element.STATE_EMPTY,
+		"busy":Element.STATE_BUSY,
+		"moving":Element.STATE_MOVING,
+		"copying":Element.STATE_COPYING,
+		"drop-target":Element.STATE_DROP_TARGET,
+		"drag-over":Element.STATE_DRAG_OVER,
+		"rtl":Element.STATE_IS_RTL,
+		"ltr":Element.STATE_IS_LTR
+	};
+}

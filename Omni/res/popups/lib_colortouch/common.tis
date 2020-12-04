@@ -1,0 +1,18 @@
+﻿include "sliderpicker.tis";
+
+class OpacityBar : Sliderpicker
+{
+	function onUpdatePos(p, input)
+	{
+		var alpha = String.printf("%.2f", 1-p);
+		if(!input)
+			self#opacity.$(input).value = alpha;
+
+		transforms.opacity = "opacity(" + alpha + ")";
+		UpdateTransforms();
+	}
+}
+
+self#btn-clear.onClick = ::ClearCSS();
+self#btn-copycss.onClick = ::CopyCSS();
+self#btn-help.onClick = ::(View.Proxy_LibraryShowDocsPage("content/css/properties.htm"), view.close());

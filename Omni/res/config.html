@@ -1,0 +1,127 @@
+﻿<!-- OmniView:on -->
+<html>
+<head>
+	<title>Configurations</title>
+
+	<script type="text/tiscript">
+		include "lib_settings/settings.tis";
+		include "shared_script.tis";
+
+		self#form.value = Settings.ns_data.config || {};
+
+		// form btns
+		function self#btn-sdkpath.onClick()
+		{
+			self#f-sdkpath.value = SelectSDK();
+		}
+
+		function self#btn-editorpath.onClick()
+		{
+			var fn = view.selectFile(#load, "Executable (*.exe)|*.exe|All Files (*.*)|*.*" , "exe");
+			if(fn)
+			{
+				fn = fn[7..];
+				self#f-editorpath.value = fn;
+			}
+		}
+
+		// helpers
+		self#f-sdkpath.on("keydown", function(evt) {
+			if(evt.keyCode==Event.VK_F1)
+				this.value = "D:\\Projetos\\Libs Shared\\sciter-sdk-3";
+		});
+
+		// actions btns
+		function self#btn-cancel.onClick()
+		{
+			view.close();
+		}
+		function self#btn-save.onClick()
+		{
+			Settings.ns_data.config = self#form.value;
+			Settings.ns_data.config.show();
+			Settings.StoreWork();
+			view.close();
+		}
+
+		/*if(!View.omniview) {
+			view.mediaVars({
+				compose: View.Proxy_view.Host_GetComposition()
+			});
+		}*/
+	</script>
+
+	<style>
+		@import url(style/global.css);
+
+		html
+		{
+			width: min-content;
+			height: min-content;
+			background: #f5f7f8;
+		}
+		form
+		{
+			padding: 15px;
+			width: *;
+			border-spacing: 6px;
+			background: #f5f7f8;
+			border: solid 1.5px #2b63cc;
+			
+			white-space: nowrap;
+		}
+
+		fieldset { padding: 10px; }
+		fieldset legend { display: block; margin-top: -20px; margin-bottom: 4px; background: #f5f7f8; color: black; }
+
+		dl { flow: row(dt,dd); border-spacing-y: 1px; }
+
+		#actions
+		{
+			flow: horizontal;
+			horizontal-align: right;
+			padding: 10px;
+		}
+		#actions button
+		{
+			font-size: 14px;
+			margin-left: 5px;
+		}
+
+		@media compose
+		{
+			html { background: none; }
+			form { border-radius: 4px; }
+			#actions { padding: 10px 0 5px 0; }
+		}
+	</style>
+</head>
+
+<body>
+	<form #form>
+		<fieldset>
+			<legend>Integration</legend>
+			<div>
+				<dl>
+					<dt>Sciter SDK path:</dt>
+					<dd>
+						<input (sdkpath) #f-sdkpath />
+						<button #btn-sdkpath .std-btn>...</button>
+					</dd>
+
+					<dt>Editor .exe path:</dt>
+					<dd>
+						<input (editorpath) #f-editorpath />
+						<button #btn-editorpath .std-btn>...</button>
+					</dd>
+				</dl>
+			</div>
+		</fieldset>
+	</form>
+
+	<div #actions>
+		<button #btn-save .std-btn>Save</button>
+		<button #btn-cancel .std-btn>Cancel</button>
+	</div>
+</body>
+</html>

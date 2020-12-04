@@ -1,0 +1,75 @@
+function AccesskeySetup()// aspect of <accesskey>
+{
+	if(Utils.IsWindows && this.@#win)
+		this.html = this.@#win;
+	else if(Utils.IsOSX && this.@#osx)
+		this.html = this.@#osx;
+}
+
+function HandleGlobalAccelerator(evt, caller_view=view)
+{
+	var ctrl;
+	var none = !evt.commandKey && !evt.ctrlKey && !evt.shiftKey && !evt.altKey
+	if(Utils.IsWindows)
+		ctrl = evt.ctrlKey && !evt.shiftKey && !evt.altKey;
+	else
+		ctrl = evt.commandKey && !evt.shiftKey && !evt.altKey;
+
+	if(ctrl)
+	{
+		switch(evt.keyCode)
+		{
+		case Event.VK_Q:
+			view.close();
+			break;
+
+		case Event.VK_W:
+		case Event.VK_F4:
+			State.ClosePage();
+			return true;
+
+		case Event.VK_H:
+			if(Utils.IsWindows)
+				return false;
+			view.Host_AppHide();
+			return true;
+
+		case Event.VK_R:
+			State.ReloadPage();
+			return true;
+			
+		case Event.VK_E:
+			UX_EditFile();
+			return true;
+
+		case Event.VK_F:
+			view.Host_RevealPath(State._page_url);
+			return true;
+		}
+	}
+
+	else if(!ctrl && !evt.shiftKey && !evt.altKey)
+	{
+		switch(evt.keyCode)
+		{
+		case Event.VK_F5:
+			State.ReloadPage();
+			break;
+
+		case Event.VK_F10:
+			if(Utils.IsWindows)
+				System.exec("explorer", System.home().replace("/", "\\"));
+			break;
+
+		case Event.VK_F12:
+			Inspector.ToggleInspector();
+			break;
+		}
+	}
+}
+
+self.on("~keydown", function(evt) {
+	HandleGlobalAccelerator(evt);
+});
+
+View.Proxy_HandleGlobalAccelerator = HandleGlobalAccelerator;

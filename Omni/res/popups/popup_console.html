@@ -1,0 +1,26 @@
+﻿<html>
+<script type="text/tiscript">
+	include "popup_common.tis";
+	include "../inc_inspector/console.tis";
+</script>
+
+<style>
+	@import url(../style/global_base.css);
+	@import url(../inc_inspector/inspector.css);
+	@import url(popup_common.css);
+</style>
+
+<menu .context #console-menu>
+	<li command="clear">Clear</li>
+	<li command="copy">Copy</li>
+</menu>
+
+<body .console-style>
+	<div #area-header title="Press ESC to close">
+		<img src="../img/hud_resize_corner.png" />
+		<header />
+		<close />
+	</div>
+	<select|list .console-output #popup-console />
+</body>
+</html>

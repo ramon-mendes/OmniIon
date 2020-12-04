@@ -1,0 +1,88 @@
+function View_Setup(cfg)
+{
+	/*view.logHandler(function(subsystem, severity, message) {
+		//view.Host_Dbg(subsystem, severity, message);
+		//System.exec("echo", message);
+		self#frameph[0].ns.View_AppendConsole([[message, severity]]);
+	});*/
+
+	// Size
+	const factorx = .72;
+	const factory = .9;
+	const minx = 800;
+	const miny = 600;
+
+	var (sw,sh) = View.screenBox(0, #workarea, #dimension);
+
+	var width = sw * factorx;
+	var height = sh * factory;
+	if(width < minx) width = minx;
+	if(height < miny) height = miny;
+
+	view.move(0, 0, width.toInteger(), height.toInteger());
+
+	self.post(function() {
+		if(cfg.t)
+			UX_ToggleTopmost();
+		if(cfg.r)
+			UX_ToggleAutoRefresh();
+	});
+}
+
+function View_LoadURL(url, is_file)
+{
+	State.OpenPage(url, is_file);
+}
+
+// -------------------------------------------------------------------
+namespace State
+{
+	var _shown = false;
+	var _page_url;
+	var _page_isfile;// for auto-refresh
+	var _data;
+
+	function OpenPage(url, is_file)
+	{
+		ClosePage();
+		_page_isfile = is_file;
+
+		if(is_file)
+		{
+			var ns_home = self#frame-home[0].ns;
+			ns_home.RFL.AddUserEntry(url);
+		}
+		self#mi-file.style#visibility = is_file ? "visible" : "none";
+
+		// Load it
+		self#frameph.load(url)
+		self.@#show-page = true;
+		
+		_page_url = url.replace("\\", "/");
+		_shown = true;
+		_data = {};
+	}
+
+	function ReloadPage()
+	{
+		if(!_shown)
+			return;
+		ClosePage();
+		view.Host_OpenURL(_page_url);
+	}
+
+	function ClosePage()
+	{
+		if(!_shown)
+			return;
+		
+		view.Host_ClosePage();
+		Omni.reset();
+		self#frameph.clear();
+		self.@#show-page = undefined;
+		gc();
+
+		_shown = false;
+		_data = {};
+	}
+}

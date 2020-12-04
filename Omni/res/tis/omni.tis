@@ -1,0 +1,56 @@
+View.omni = true;
+
+// OMNI Specific
+namespace Omni
+{
+	property dom_tree_disable(value)
+	{
+		get return View.omnidata.dom_tree_disable;
+		set View.omnidata.dom_tree_disable = value;
+	}
+
+	property right_inspect_disable(value)
+	{
+		get return View.omnidata.right_inspect_disable;
+		set View.omnidata.right_inspect_disable = value;
+	}
+
+	property show_tree_timing(value)
+	{
+		get return View.omnidata.show_tree_timing;
+		set View.omnidata.show_tree_timing = value;
+	}
+
+
+	function toggleAero()
+	{
+		View.Proxy_view.Host_ToggleAero();
+	}
+	
+	function openConsole()
+	{
+		View.Proxy_NS.Inspector.ShowInspector(1);
+	}
+
+	function reset()
+	{
+		console.reset();
+	}
+}
+
+console.dom = function(el) {
+	if(typeof el!=#Element)
+		throw "Not an Element (" + el + ")";
+
+	View.Proxy_view.Host_InspectElement(el);
+	return el;
+}
+
+if(!View.omnidata)
+{
+	View.omnidata = {
+		dom_tree_disable: false,
+		right_inspect_disable: false,
+		show_tree_timing: false
+	};
+}

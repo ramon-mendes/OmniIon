@@ -1,0 +1,547 @@
+﻿<html>
+
+<script type="text/tiscript">
+	include "source-view.tis";
+
+	$(frameset).state.focusable = false;
+
+	self.closing = function(reason) {
+		view.windowState = View.WINDOW_HIDDEN;
+		return false;
+	}
+
+	namespace DEBUG_COMMAND
+	{
+		const CONTINUE = 1;
+		const STEP_INTO = 2;
+		const STEP_OVER = 3;
+		const STEP_OUT = 4;
+	}
+
+	View.Proxy_DebuggerShow = function()
+	{
+		if(view.state==View.WINDOW_SHOWN)
+			view.state = View.WINDOW_HIDDEN;
+		else
+			view.Host_OpenDebugger();
+	}
+
+
+	var ns_rs = {};
+	var ns_saved_url;
+	var ns_saved_bks;
+	var ns_saved_view_url;
+
+	function Extern_LoadedResource(rs, restype)
+	{
+		const RESTYPE_MARKUP = 1;
+		const RESTYPE_SCRIPT = 2;
+		const RESTYPE_INTERNAL = 3;
+
+		//assert(!ns_rs[rs.url]);
+		if(ns_rs[rs.url])
+			return;
+
+		//log("Extern_LoadedFile", rs.url, rs.url %~ "/");
+		var el = new Element(#option);
+		switch(restype)
+		{
+			case RESTYPE_MARKUP: self#list-markup.append(el); break;
+			case RESTYPE_SCRIPT: self#list-script.append(el); break;
+			case RESTYPE_INTERNAL: self#list-internal.append(el); break;
+		}
+
+		if(rs.url.indexOf("/")!=-1)
+			el.html = rs.url %~ "/";
+		else
+			el.html = rs.url;
+		el.url = rs.url;
+
+		ns_rs[rs.url] = rs;
+	}
+
+	function Extern_ReloadDebugger(url)
+	{
+		if(ns_saved_url==url)
+		{
+			// restored closed page state
+			for(var bkp in ns_saved_bks)
+				AddBreakpoint(bkp[1], bkp[0]);
+
+			self.post(::NavigateToSource(ns_saved_view_url));
+		}
+
+		ReceiveVSList();
+
+		ns_saved_url = url;
+	}
+	function Extern_ResetDebugger()
+	{
+		debugCommand = DEBUG_COMMAND.CONTINUE;
+		for(var (i,v) in ns_bks)
+			VM.removeBreakpoint(v[0], v[1]);
+
+		// saves closed page state
+		ns_saved_bks = ns_bks;
+		ns_saved_view_url = ns_view_url;
+
+		ns_bks = [];
+		UpdateBreakpointsList();
+
+		ns_rs = {};
+		self#list-markup.clear();
+		self#list-script.clear();
+		self#list-internal.clear();
+		self#source-view.value = "";
+		ns_view_url = undefined;
+	}
+
+	// UI handling ---------------------------------------------------------------------
+	self#list-markup.onValueChanged = function(el_opt) {
+		self#list-script.value = undefined;
+		self#list-internal.value = undefined;
+		//view.update();
+		NavigateToSource(el_opt.url);
+	};
+	self#list-script.onValueChanged = function(el_opt) {
+		self#list-markup.value = undefined;
+		self#list-internal.value = undefined;
+		//view.update();
+		NavigateToSource(el_opt.url);
+	};
+	self#list-internal.onValueChanged = function(el_opt) {
+		self#list-markup.value = undefined;
+		self#list-script.value = undefined;
+		//view.update();
+		NavigateToSource(el_opt.url);
+	};
+
+	$(.debug-continue).onClick = function() { debugCommand = DEBUG_COMMAND.CONTINUE; }
+	$(.debug-step-in).onClick = function() { debugCommand = DEBUG_COMMAND.STEP_INTO; }
+	$(.debug-step-over).onClick = function() { debugCommand = DEBUG_COMMAND.STEP_OVER; }
+	$(.debug-step-out).onClick = function() { debugCommand = DEBUG_COMMAND.STEP_OUT; }
+
+	self.on("keydown", function(evt) {
+		if(evt.ctrlKey)
+		{
+			if(evt.keyCode=='G' && ns_view_url)
+			{
+				var lineNo;
+				var linesTotal = self#source-view.length;
+				view.msgbox(#information, "Line number (1 - " + linesTotal + "): <br><input !integer min=1 max=" + linesTotal + " step=1 />", "Omni", [#ok, #cancel], function(root) {}, function(root, id) {
+					lineNo = root.$(input).value;
+					return true;
+				});
+				if(typeof lineNo==#integer && lineNo>=1 && lineNo<=linesTotal)
+					self#source-view.setHighlightLine(lineNo);
+			}
+		} else if(evt.shiftKey) {
+			if(evt.keyCode==Event.VK_F11)
+			{
+				debugCommand = DEBUG_COMMAND.STEP_OUT;
+			}
+		} else {
+			switch(evt.keyCode)
+			{
+			case Event.VK_F5:
+				debugCommand = DEBUG_COMMAND.CONTINUE;
+				break;
+			case Event.VK_F10:
+				debugCommand = DEBUG_COMMAND.STEP_OVER;
+				break;
+			case Event.VK_F11:
+				debugCommand = DEBUG_COMMAND.STEP_INTO;
+				break;
+			case Event.VK_ESCAPE:
+				View.Proxy_DebuggerShow();
+				break;
+			}
+		}
+	});
+
+	self#stack-list.on("click", "li", function(evt) {
+		NavigateToSource(this.url, this.lineNo);
+	});
+
+	self#breakpoint-list.on("click", "li", function(evt) {
+		if(evt.target.$is(i))
+			RemoveBreakpoint(this.lineNo, this.url);
+		else
+			NavigateToSource(this.url, this.lineNo);
+		return true;
+	});
+</script>
+
+<script type="text/tiscript">
+	var ns_vs_arr_bkps;
+	var ns_vs_ds;
+
+	var ns_waitdata_lock;
+
+	/*DataSocket.listen(function(ds) {
+		ns_vs_ds = ds;
+		//trace("listen");
+
+		ds.on("data", function(arr_bks) {
+			//trace("data");
+
+			// add breakpoints to list
+			for(var bkp in arr_bks)
+			{
+				//if(!ns_rs[bkp[0]])// url resource exists?
+				//	continue;
+
+				if(ns_bks.indexOf(bkp)==-1)
+				{
+					ns_bks.push(bkp);
+					VM.addBreakpoint(bkp[0], bkp[1]);
+				}
+			}
+
+			// remove missing ones
+			if(ns_vs_arr_bkps)
+			{
+				var missing_bkps = [];
+
+				for(var bkp in ns_vs_arr_bkps)
+				{
+					if(arr_bks.indexOf(bkp)==-1)
+						missing_bkps.push(bkp);
+				}
+
+				for(var bkp in missing_bkps)
+				{
+					ns_bks.removeByValue(bkp);
+					VM.removeBreakpoint(bkp[0], bkp[1]);
+				}
+			}
+
+			ns_vs_arr_bkps = arr_bks;
+			UpdateBreakpointsList();
+			RefreshViewBreakpoints()
+
+			ns_waitdata_lock = false;
+		});
+
+		ds.on("close", function() {
+			//ptrace("close");
+			ns_vs_ds = undefined;
+		});
+
+		return true;
+	}, 21344);*/
+	
+	function RemoveVSBkp(url, line)
+	{
+		ns_vs_arr_bkps.removeByValue([url, line]);
+		if(!ns_vs_ds)
+			return;
+
+		try
+		{
+			ns_vs_ds.send("rmvbkp");
+			ns_vs_ds.send([url, line]);
+		} catch(e) {
+		}
+	}
+
+	function ReceiveVSList()
+	{
+		//trace("ReceiveVSList", ns_vs_ds.active);
+
+		if(ns_vs_ds && ns_vs_ds.active)
+		{
+			try
+			{
+				ns_vs_ds.send("resend");
+				ns_waitdata_lock = true;
+
+				var tm_start = System.ticks;
+				do
+				{
+					view.doEvent(#all);
+					if(System.ticks - tm_start > 2000)
+						break;
+				} while(ns_waitdata_lock);
+			} catch(e) {
+			}
+		}
+	}
+</script>
+
+<script type="text/tiscript">
+	var debugCommand;
+	var ns_bks = []; //[url, line] array
+	var ns_view_url;
+	var ns_dbg_url;
+	var ns_dbg_line;
+
+	self.post(function() {
+	VM.breakpointHitHandler = function(url, lineNo, env)
+	{
+		//log("debugger enter", url, lineNo, env, debugCommand);
+
+		if(ns_rs[url])// debugger might have already been closed but 'debug break' statements might be triggering this handler
+		{
+			// debugger enter
+			view.Host_OpenDebugger();
+			self#debugger-toolbar.state.disabled = false;
+
+			ns_dbg_url = url;
+			ns_dbg_line = lineNo;
+			UpdateStacktrace(env.stacktrace);
+			UpdateVars(env.locals);
+			NavigateToSource(url, lineNo, true);
+
+			// Break
+			debugCommand = 0;
+			var ic = 0;
+			while(!debugCommand)
+				view.doEvent();
+			
+			// debugger leave
+			self#debugger-toolbar.state.disabled = true;
+			self#source-view.setStepLine();
+			UpdateStacktrace();
+			UpdateVars();
+
+			ns_dbg_url = undefined;
+			ns_dbg_line = undefined;
+		} else {
+			log("Debugger: break in a file which is not tracked (" + url + ", line " + lineNo + ")");
+		}
+
+		//log("debugger leave", debugCommand);
+		return debugCommand;
+	};
+
+	});
+
+	function UpdateStacktrace(stacktrace=undefined)
+	{
+		self#stack-list.clear();
+		if(stacktrace)
+		{
+			for(var (n,st) in stacktrace)
+			{
+				var lineNo = st[0];
+				var funcName = st[1] || "";
+				var url = st[2];
+
+				var el_li = self#stack-list.append(new Element(#li));
+				el_li.$append(
+					<span.funcName>{funcName}</span>
+					<span.file>{url %~ "/"}:</span>
+					<span.lineNo>{lineNo}</span>);
+				el_li.url = url;
+				el_li.lineNo = lineNo;
+			}
+		}
+	}
+	function UpdateVars(locals=undefined)
+	{
+		self#variables-list[0].clear();
+		if(locals)
+		{
+			var condensed = {};
+
+			// locals is an array of the frames, condense it all in one thing
+			for(var frame_obj in locals)
+			{
+				for(var (k,v) in frame_obj)
+					condensed[k] = v;
+			}
+			self#variables-list[0].show(condensed);
+		}
+	}
+	
+	function UpdateBreakpointsList()
+	{
+		self#breakpoint-list.clear();
+		for(var (n,bkp) in ns_bks)
+		{
+			var url = bkp[0];
+			var line = bkp[1];
+			
+			var el_li = self#breakpoint-list.append(new Element(#li));
+			el_li.$append(
+				<span .file>{url %~ "/"}</span>
+				<span .lineNo>, line {line}</span>);
+			if(ns_vs_arr_bkps && ns_vs_arr_bkps.indexOf(bkp)!=-1)
+				el_li.$append(, VS);
+			el_li.$append(<span .rmv><i .ft.ft-cancel-1 /></span>);
+			el_li.url = url;
+			el_li.lineNo = line;
+		}
+	}
+	function RefreshViewBreakpoints()
+	{
+		var arr_bks = ns_bks.filter(:e:e[0]==ns_view_url);
+		var arr_bks_lines = arr_bks.map(:e:e[1]);
+		self#source-view.loadBreakpoints(arr_bks_lines);
+	}
+
+	function AddBreakpoint(lineNo, url = ns_view_url)
+	{
+		ns_bks.push([url, lineNo]);
+		UpdateBreakpointsList();
+		RefreshViewBreakpoints()
+		VM.addBreakpoint(url, lineNo);
+	}
+	function RemoveBreakpoint(lineNo, url = ns_view_url)
+	{
+		var bkp = ns_bks.removeByValue([url, lineNo]);
+		UpdateBreakpointsList();
+		RefreshViewBreakpoints()
+		VM.removeBreakpoint(url, lineNo);
+
+		if(ns_vs_arr_bkps && ns_vs_arr_bkps.indexOf(bkp)!=-1)
+			RemoveVSBkp(url, lineNo);
+	}
+
+	function NavigateToSource(url, lineNo = undefined, step = false)// lineNo is 1 based
+	{
+		if(ns_rs[url]==undefined)// happens at page load when it is a network resource which has not yet loaded
+			return;
+
+		const	RT_DATA_HTML = 0,
+				RT_DATA_IMAGE = 1,
+				RT_DATA_STYLE = 2,
+				RT_DATA_CURSOR = 3,
+				RT_DATA_SCRIPT = 4,
+				RT_DATA_RAW = 5;
+
+		if(ns_view_url != url)
+		{
+			ns_view_url = url;
+			self#source-view.load(ns_rs[url].data, ns_rs[url].dataType==RT_DATA_SCRIPT ? "script" : "html");
+
+			RefreshViewBreakpoints();
+
+			if(ns_dbg_url==url)
+			{
+				self#source-view.setStepLine(ns_dbg_line);
+			}
+		}
+
+		if(lineNo)
+		{
+			if(step)
+				self#source-view.setStepLine(lineNo);
+			else
+				self#source-view.setHighlightLine(lineNo);
+		}
+	}
+</script>
+
+<style>
+	@import url(../style/global.css);
+	@import url(../popups/data_popup.css);
+	@import url(source-code.css);
+
+	@const OPTION-BG-NORMAL:  none;
+	@const OPTION-BG-CURRENT: url(sciter:list-view-item-selected-not-focus.png) expand(stretch-left,stretch-right,stretch-middle) 4 4 4 4;
+	@const OPTION-BG-FOCUS:   url(sciter:list-view-item-selected.png) expand(stretch-left,stretch-right,stretch-middle) 4 4 4 4;
+	@const OPTION-BG-HOVER:   url(sciter:list-view-item-hover.png) expand(stretch-left,stretch-right,stretch-middle) 4 4 4 4;
+	
+	frameset { overflow: hidden; }
+	frameset splitter { width: 1px; background: #aaa; }
+	frameset splitter { hit-margin: 0 0 0 3px; }
+	frameset header { padding: 3px 4px; border: solid #a5a5a5 1px; border-left: none; border-right: none; background: #e5e5e5; color: #667380; font-size: 13px; font-family: monospace; }
+
+	#area-files select { display: block; background: none; width: *; height: *; }
+
+	plaintext { style-set: source-code; prototype: SourceView; }
+
+	#area-debug #debugger-toolbar { flow: horizontal; padding: 1px; background-color: greenyellow; }
+	#area-debug #debugger-toolbar:disabled { background-color: #eee; }
+	#area-debug #debugger-toolbar button { padding: 1px 12px; }
+
+	#area-debug ul { size: * auto; padding: 0; list-style: none; }
+	#area-debug ul { margin: 0; margin-bottom: 12px; font-size: 12px; }
+
+	#area-debug ul#stack-list li
+	{
+		flow: horizontal;
+		padding: 2px 3px;
+		background: #d7e4f2;
+		border-bottom: solid 1px #99b4d1;
+		white-space: nowrap;
+		cursor: pointer;
+		font-family: system;
+	}
+	#area-debug ul#stack-list li .funcName { font-weight: bold; }
+	#area-debug ul#stack-list li .file { margin-left: *; }
+	#area-debug ul#stack-list li .lineNo {}
+
+	#area-debug ul#breakpoint-list li
+	{
+		flow: horizontal;
+		padding: 2px 3px;
+		background: #c5e2c1;
+		border-bottom: solid 1px #2cbb0f;
+		white-space: nowrap;
+		cursor: pointer;
+		font-family: system;
+	}
+	#area-debug ul#breakpoint-list li .rmv { margin-left: *; color: rgba(0,0,0,.2); }
+	#area-debug ul#breakpoint-list li .rmv:hover { color: #d53535; }
+
+	/*#area-debug ul > li { flow:horizontal; width:*; white-space: nowrap; padding:0; margin:0; behavior: clickable; background: @OPTION-BG-NORMAL; }
+	#area-debug ul > li:hover { cursor:pointer; background: @OPTION-BG-HOVER; }
+
+	#area-debug ul > li span.path { display:block; width:*; overflow-x:hidden; text-overflow:ellipsis; }
+	#area-debug ul > li span.lineNo { display:block; font-weight:bold; margin-right:8dip; min-width:1.6em; text-align:right; }*/
+</style>
+
+<body>
+	<frameset cols="240,*,250">
+		<section #area-files>
+			<header style="border-top: none">Markup files</header>
+			<select |list #list-markup />
+
+			<header>Script files</header>
+			<select |list #list-script />
+
+			<header .hide>Internal files</header>
+			<select |list #list-internal.hide />
+
+			<style>
+				@media debug
+				{
+					#area-files .hide { visibility: visible; }
+				}
+			</style>
+		</section>
+
+		<splitter />
+
+		<section>
+			<plaintext readonly #source-view />
+		</section>
+
+		<splitter />
+
+		<section #area-debug>
+			<div #debugger-toolbar disabled>
+				<button .debug-continue title="Continue (F5)">Run</button>
+				<button .debug-step-in title="Step into (F11)">In</button>
+				<button .debug-step-over title="Step over (F10)">Over</button>
+				<button .debug-step-out title="Step out (Shift + F11)">Out</button>
+			</div>
+
+			<header>Stack trace</header>
+			<ul #stack-list />
+
+			<header>Variables</header>
+			<ul #variables-list style="size: *">
+				<select!tree .data-tree />
+			</ul>
+
+			<header>Breakpoints</header>
+			<ul #breakpoint-list />
+		</section>
+	</frameset>
+</body>
+
+</html>

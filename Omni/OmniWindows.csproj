@@ -93,27 +93,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\HIDLinux.cs">
-      <Link>Src\Ion\HIDLinux.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\HIDOSX.cs">
-      <Link>Src\Ion\HIDOSX.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\HIDWindows.cs">
-      <Link>Src\Ion\HIDWindows.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\IonApp.cs">
-      <Link>Src\Ion\IonApp.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\IonConsts.cs">
-      <Link>Src\Ion\IonConsts.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\IonWeb.cs">
-      <Link>Src\Ion\IonWeb.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\ProjetosMVC\IonMVC\IonMVC\Classes\Ion\UpdateControl.cs">
-      <Link>Src\Ion\UpdateControl.cs</Link>
-    </Compile>
     <Compile Include="Src\App.cs" />
     <Compile Include="Src\ArchiveResource.cs" />
     <Compile Include="Src\ConstsGlobals.cs" />
@@ -131,6 +110,14 @@
     <Compile Include="Src\Hosting\HostEvh.cs" />
     <Compile Include="Src\Hosting\InternalDbg.cs" />
     <Compile Include="Src\Hosting\WndHostDebugger.cs" />
+    <Compile Include="Src\Ion\HIDLinux.cs" />
+    <Compile Include="Src\Ion\HIDOSX.cs" />
+    <Compile Include="Src\Ion\HIDWindows.cs" />
+    <Compile Include="Src\Ion\IonApp.cs" />
+    <Compile Include="Src\Ion\IonConsts.cs" />
+    <Compile Include="Src\Ion\IonWeb.cs" />
+    <Compile Include="Src\Ion\MVCHost.cs" />
+    <Compile Include="Src\Ion\UpdateControl.cs" />
     <Compile Include="Src\SimpleBSON.cs" />
     <Compile Include="Src\Tests.cs" />
     <Compile Include="Src\Utilities\Mono.cs" />
@@ -187,10 +174,6 @@
     <None Include="res\index.html" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\..\sciter-sdk\bin.win\x64\sciter.dll">
-      <Link>sciter.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="res\debugger\debugger.html" />
     <Content Include="res\debugger\source-code.css" />
     <Content Include="res\img\blade_loadingprogress.gif" />
@@ -263,7 +246,11 @@
     <Content Include="res\style\fonts\Shumi-font.css" />
     <Content Include="res\style\global.css" />
     <Content Include="res\style\index.css" />
+    <Content Include="res\test.js" />
     <Content Include="res\unittest.html" />
+    <Content Include="sciter.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="scripts\packfolder.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

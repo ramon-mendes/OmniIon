@@ -15,11 +15,18 @@
 
 		self#btn-trial.onClick = function() {
 			self.state.disabled = true;
-			expando.activate(function(ok, msg) {
-				if(!ok)
-					view.msgbox(#alert, "Could not start your trial period.", "Omni");
+			if(!expando.active)
+			{
+				expando.activate(function(ok, msg) {
+					if(!ok)
+						view.msgbox(#alert, "Could not start your trial period.", "Omni");
+					view.close();
+				});
+			}
+			else
+			{
 				view.close();
-			});
+			}
 		};
 
 		if(expando.active)
@@ -34,7 +41,7 @@
 			self#expired.show();
 			self#btn-trial.state.disabled = true;
 		}
-		
+
 		// Register UI ---------------------------------------------------------------
 		self#btn-reg-cancel.onClick = function() {
 			self#main-section.style#visibility = "visible";

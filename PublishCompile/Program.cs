@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 
-partial class Script : ScriptBase
+class Script : ScriptBase
 {
 	const string APPNAME = "Omni";
 	const string APPNAME_EXE = APPNAME + ".exe";

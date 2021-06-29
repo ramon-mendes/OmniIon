@@ -5,12 +5,12 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 
-partial class Script
+class ScriptBase
 {
 	public static string CWD;
 	public static string _upload_output;
 
-	static void GitPush()
+	protected static void GitPush()
 	{
 		SpawnProcess("git", "status");
 		SpawnProcess("git", "add -A");
@@ -19,7 +19,7 @@ partial class Script
 		SpawnProcess("git", "push");
 	}
 
-	static void SpawnProcess(string exe, string args = null, bool ignore_error = false, bool wait = true)
+	protected static void SpawnProcess(string exe, string args = null, bool ignore_error = false, bool wait = true)
 	{
 		var startInfo = new ProcessStartInfo(exe, args)
 		{
